@@ -117,3 +117,34 @@ th {
     font-size: 0.7em;
   }
 }
+
+.tabela-estilizada {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  background: white;
+}
+
+.tabela-estilizada th {
+  background-color: #f8f9fa;
+  color: var(--primary);
+  text-align: left;
+  padding: 15px;
+  border-bottom: 2px solid #eee;
+}
+
+.tabela-estilizada td {
+  padding: 15px;
+  border-bottom: 1px solid #eee;
+  vertical-align: top;
+}
+
+.feedback-vazio p {
+  margin: 5px 0 0;
+  font-size: 0.9em;
+}
+
+.coluna-resumo {
+  max-width: 400px; /* Evita que a tabela fique larga demais */
+  font-size: 0.85em;
+}

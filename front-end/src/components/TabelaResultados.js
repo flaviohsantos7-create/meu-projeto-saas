@@ -1,18 +1,19 @@
 import React from 'react';
 
 const TabelaResultados = ({ artigos, aoVoltar }) => {
+  // Garante que 'artigos' seja sempre uma lista para evitar erros de renderização
+  const listaArtigos = Array.isArray(artigos) ? artigos : [];
+
   return (
     <div className="container-tabela">
       <div className="header-tabela">
         <h3>Tabela Resumida de Artigos Científicos</h3>
         <button className="btn-voltar" onClick={aoVoltar}>Nova Pesquisa</button>
       </div>
-      
-      <p>Artigos encontrados com alto índice de compatibilidade:</p>
 
-      <table border="1" style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse' }}>
+      <table border="1" className="tabela-estilizada">
         <thead>
-          <tr style={{ backgroundColor: '#f2f2f2' }}>
+          <tr>
             <th>Nota</th>
             <th>Título do Artigo</th>
             <th>Autores</th>
@@ -21,23 +22,32 @@ const TabelaResultados = ({ artigos, aoVoltar }) => {
           </tr>
         </thead>
         <tbody>
-          {artigos.map((art, index) => (
-            <tr key={index}>
-              <td style={{ fontWeight: 'bold', color: art.nota > 70 ? 'green' : 'orange' }}>
-                {art.nota}%
-              </td>
-              <td>{art.titulo}</td>
-              <td>{art.autores}</td>
-              <td>{art.data}</td>
-              <td>
-                <strong>Resumo:</strong> {art.resumo.substring(0, 200)}...
-                <br />
-                <br />
-                <strong>Por que ler este artigo?</strong> 
-                <p style={{ fontStyle: 'italic', color: '#555' }}>"{art.justificativa}"</p>
+          {listaArtigos.length > 0 ? (
+            // Se houver artigos, renderiza as linhas normalmente
+            listaArtigos.map((art, index) => (
+              <tr key={index}>
+                <td className="nota-high">{art.nota}%</td>
+                <td>{art.titulo}</td>
+                <td>{art.autores}</td>
+                <td>{art.data}</td>
+                <td className="coluna-resumo">
+                  <strong>Resumo:</strong> {art.resumo?.substring(0, 150)}...
+                  <br /><br />
+                  <strong>Justificativa:</strong> {art.justificativa}
+                </td>
+              </tr>
+            ))
+          ) : (
+            // Se a lista estiver vazia, renderiza uma linha única ocupando todas as colunas
+            <tr>
+              <td colSpan="5" style={{ textAlign: 'center', padding: '40px', color: '#999' }}>
+                <div className="feedback-vazio">
+                  <strong>Nenhum artigo encontrado.</strong>
+                  <p>Tente ajustar os termos da sua busca ou o contexto semântico.</p>
+                </div>
               </td>
             </tr>
-          ))}
+          )}
         </tbody>
       </table>
     </div>
