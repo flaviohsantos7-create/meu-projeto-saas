@@ -16,7 +16,7 @@ def gerar_chaves_e_contexto(dados_questionario, client):
     """
 
     response = client.chat.completions.create(
-        model="gpt-5-mini",
+        model="gpt-4o-mini",
         messages=[
             {"role": "system", "content": prompt_sistema},
             {"role": "user", "content": respostas_usuario}
@@ -42,7 +42,7 @@ def filtrar_artigos_com_ia(contexto_gerado, lista_artigos, client):
 
         try:
             response = client.chat.completions.create(
-                model="gpt-5-mini",
+                model="gpt-4o-mini",
                 messages=[{"role": "user", "content": prompt}],
                 response_format={ "type": "json_object" }
             )
