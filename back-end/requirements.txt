@@ -1,8 +1,8 @@
 flask
 flask-cors
+sqlalchemy
 openai
 python-dotenv
-sqlalchemy
-biopython
-feedparser
 gunicorn
+requests
+feedparser
