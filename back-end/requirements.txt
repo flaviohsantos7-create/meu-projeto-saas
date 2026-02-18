@@ -4,4 +4,5 @@ openai
 python-dotenv
 sqlalchemy
 biopython
+feedparser
 gunicorn

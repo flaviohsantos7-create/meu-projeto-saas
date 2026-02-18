@@ -18,8 +18,12 @@ class Busca(Base):
     termos_obrigatorios = Column(Text)
     contexto_usuario = Column(Text)
     
-    string_busca_gerada = Column(Text)
-    contexto_semantico = Column(Text)
+    string_busca_pt = Column(Text)
+    contexto_pt = Column(Text)
+
+    string_busca_en = Column(Text)
+    contexto_en = Column(Text)
+    fonte = Column(Text)
     
     data_criacao = Column(DateTime, default=datetime.datetime.utcnow)
 
@@ -29,6 +33,10 @@ class Artigo(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     busca_id = Column(Integer, ForeignKey("buscas.id"))
+
+    string_busca_en = Column(Text)
+    contexto_en = Column(Text)
+    fonte = Column(Text)
     
     titulo = Column(String(500))
     resumo = Column(Text)

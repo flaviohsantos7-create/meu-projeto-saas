@@ -43,6 +43,7 @@ const Questionario = ({ aoFinalizar }) => {
 
         <label>Qual problema você está tentando resolver?</label>
         <textarea 
+          type="text"
           value={formData.problema} 
           onChange={(e) => setFormData({...formData, problema: e.target.value})} 
           required 
@@ -56,7 +57,8 @@ const Questionario = ({ aoFinalizar }) => {
         />
 
         <label>Contexto ou Cenário de Aplicação:</label>
-        <textarea 
+        <textarea
+          type="text" 
           value={formData.contexto} 
           onChange={(e) => setFormData({...formData, contexto: e.target.value})} 
         />
