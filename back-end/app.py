@@ -66,21 +66,22 @@ def rota_buscar_artigos():
     c_pt = dados.get('contexto_pt')
 
     try:
-        res_pubmed = buscar_pubmed(s_en) or []
-        res_arxiv = buscar_arxiv(s_en) or []
-        res_semantic = buscar_semantic_scholar(s_en) or []
-        res_crossref = buscar_crossref(s_pt) or []
-        res_doaj = buscar_doaj(s_pt) or []
+
+        limite = 10
+
+        res_pubmed = buscar_pubmed(s_en, max_results=limite) or []
+        res_arxiv = buscar_arxiv(s_en, max_results=limite) or []
+        res_semantic = buscar_semantic_scholar(s_en, max_results=limite) or []
+        res_crossref = buscar_crossref(s_pt, max_results=limite) or []
+        res_doaj = buscar_doaj(s_pt, max_results=limite) or []
 
         lista_bruta = res_pubmed + res_arxiv + res_semantic + res_crossref + res_doaj
 
         if not lista_bruta:
             return jsonify({"error": "Nenhum artigo encontrado nas bases."}), 404
-        
-        lista_para_filtrar = lista_bruta[:]
 
         artigos_finalizados = filtrar_artigos_ia_unificado(
-            c_en, c_pt, lista_para_filtrar, client
+            c_en, c_pt, lista_bruta, client
         )
 
         db = SessionLocal()
@@ -99,6 +100,7 @@ def rota_buscar_artigos():
         db.commit()
         
         return jsonify(artigos_finalizados)
+    
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 #____________________________________________________________________________________________________________________________________________________

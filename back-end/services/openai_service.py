@@ -14,12 +14,18 @@ def gerar_estratégia_bilíngue(dados_brutos, client):
     Termos: {termos}
     Contexto: {contexto}
 
+    DIRETRIZES DE LÓGICA BOOLEANA:
+    1. Priorize o operador 'OR' para agrupar sinônimos, variações gramaticais e termos correlatos.
+    2. Use o operador 'AND' APENAS para conectar conceitos diferentes (ex: Tema AND Tecnologia AND Localização).
+    3. Evite strings restritivas demais. Se o usuário forneceu termos variados para o mesmo conceito, eles DEVEM estar entre parênteses unidos por 'OR'.
+    4. Garanta que a string em inglês utilize termos técnicos (MeSH/Emtree) quando apropriado.
+
     Gere um JSON com a seguinte estrutura:
     {{
-        "string_pt": "String booleana em português para Crossref/SciELO" (ex: "Termo A" OR "Termo B" / a depender das semelhanças de termos ou complementos de termos usar o AND do jeito que ficaria melhor para uma pesquisa),
-        "contexto_pt": "Resumo do contexto em português",
-        "string_en": "String booleana em inglês técnico para PubMed/arXiv" (ex: "Termo A" OR "Termo B" / a depender das semelhanças de termos ou complementos de termos usar o AND do jeito que ficaria melhor para uma pesquisa),
-        "contexto_en": "Resumo do contexto em inglês para filtragem de resumos"
+        "string_pt": "String booleana em português (ex: ('termo1' OR 'sinônimo') AND ('contexto1' OR 'contexto2'))",
+        "contexto_pt": "Resumo técnico do contexto em português para comparação",
+        "string_en": "String booleana em inglês técnico (ex: ('term1' OR 'synonym') AND ('context1' OR 'context2'))",
+        "contexto_en": "Technical context summary in English for semantic filtering"
     }}
     """
     
@@ -55,7 +61,7 @@ def filtrar_artigos_ia_unificado(contexto_en, contexto_pt, artigos, client):
     {json.dumps(lista_simplificada, ensure_ascii=False)}
 
     TAREFA:
-    Para cada artigo da lista, atribua uma nota de 0 a 100 e uma justificativa curta em Português.
+    Para cada artigo, retorne uma nota (0-100) e uma justificativa de no máximo 15 palavras em Português. Seja direto e técnico
     
     RETORNO OBRIGATÓRIO (JSON):
     Retorne um objeto JSON com uma chave "avaliacoes" contendo uma lista de objetos:
