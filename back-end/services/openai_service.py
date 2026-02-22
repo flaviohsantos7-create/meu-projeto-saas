@@ -34,45 +34,55 @@ def gerar_estratégia_bilíngue(dados_brutos, client):
 #_________________________________________________________________________________________________________________________________________________
 def filtrar_artigos_ia_unificado(contexto_en, contexto_pt, artigos, client):
 
-    avaliados = []
+    if not artigos:
+        return []
+
+    lista_simplificada = []
+    for i, art in enumerate(artigos):
+        lista_simplificada.append({
+            "id_temp": i,
+            "titulo": art['titulo'],
+            "resumo": art['resumo'][:500]
+        })
+
+    prompt = f"""
+    Você é um avaliador acadêmico. Analise a lista de artigos abaixo comparando-os com o escopo da pesquisa.
     
-    for art in artigos:
-        prompt = f"""
-        OBJETIVO: Avaliar a compatibilidade de um artigo científico com o escopo da pesquisa.
+    ESCOPO (PT): {contexto_pt}
+    ESCOPO (EN): {contexto_en}
+
+    LISTA DE ARTIGOS:
+    {json.dumps(lista_simplificada, ensure_ascii=False)}
+
+    TAREFA:
+    Para cada artigo da lista, atribua uma nota de 0 a 100 e uma justificativa curta em Português.
+    
+    RETORNO OBRIGATÓRIO (JSON):
+    Retorne um objeto JSON com uma chave "avaliacoes" contendo uma lista de objetos:
+    {{"avaliacoes": [ {{"id_temp": 0, "nota": 85, "justificativa": "..."}}, ... ]}}
+    """
+
+    try:
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": "Você é um assistente de pesquisa eficiente que responde apenas em JSON."},
+                {"role": "user", "content": prompt}
+            ],
+            response_format={"type": "json_object"}
+        )
         
-        ESCOPO DA PESQUISA (PT): {contexto_pt}
-        ESCOPO DA PESQUISA (EN): {contexto_en}
+        resultado_ia = json.loads(response.choices[0].message.content)
+        avaliacoes = {item['id_temp']: item for item in resultado_ia.get('avaliacoes', [])}
+
+        artigos_finais = []
+        for i, art in enumerate(artigos):
+            info_ia = avaliacoes.get(i, {"nota": 0, "justificativa": "Não avaliado pela IA."})
+            artigos_finais.append({**art, **info_ia})
         
-        DADOS DO ARTIGO:
-        Título: {art['titulo']}
-        Resumo: {art['resumo']}
-        Fonte: {art.get('fonte', 'N/A')}
-        
-        TAREFA:
-        1. Compare o artigo com o escopo (em ambas as línguas).
-        2. Atribua uma nota de 0 a 100.
-        3. Justifique em Português por que este artigo é relevante ou não.
-        
-        RETORNO: Responda apenas com um JSON no formato:
-        {{"nota": int, "justificativa": "string"}}
-        """
-        
-        try:
-            response = client.chat.completions.create(
-                model="gpt-4o-mini",
-                messages=[{"role": "system", "content": "Você é um assistente de pesquisa científica bilíngue."},
-                          {"role": "user", "content": prompt}],
-                response_format={ "type": "json_object" }
-            )
-            
-            analise = json.loads(response.choices[0].message.content)
-            
-            art_completo = {**art, **analise}
-            avaliados.append(art_completo)
-            
-        except Exception as e:
-            print(f"Erro ao avaliar artigo {art['titulo']}: {e}")
-            avaliados.append({**art, "nota": 0, "justificativa": "Erro na análise da IA."})
-            
-    return avaliados
+        return artigos_finais
+
+    except Exception as e:
+        print(f"Erro na filtragem em lote: {e}")
+        return [{**art, "nota": 0, "justificativa": "Erro no processamento."} for art in artigos]
 #_________________________________________________________________________________________________________________________________________________

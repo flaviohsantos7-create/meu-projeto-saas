@@ -4,16 +4,18 @@ from flask_cors import CORS
 from dotenv import load_dotenv
 from openai import OpenAI
 from services.pubmed_service import executar_busca_completa
-# from services.openai_service import filtrar_artigos_com_ia
+
 from models.database import Artigo
 
-# from services.openai_service import gerar_chaves_e_contexto
 from models.database import SessionLocal, init_db, Busca
 
 from services.pubmed_service import executar_busca_completa as buscar_pubmed
 from services.arxiv_service import buscar_arxiv
 from services.crossref_service import buscar_crossref
+from services.semantic_scholar_service import buscar_semantic_scholar
+from services.doaj_service import buscar_doaj
 from services.openai_service import gerar_estratégia_bilíngue, filtrar_artigos_ia_unificado
+
 #___________________________________________________________________________________________________________________________________________________________
 app = Flask(__name__)
 CORS(app)
@@ -64,14 +66,21 @@ def rota_buscar_artigos():
     c_pt = dados.get('contexto_pt')
 
     try:
-        artigos_pubmed = buscar_pubmed(s_en)
-        artigos_arxiv = buscar_arxiv(s_en)
-        artigos_crossref = buscar_crossref(s_pt)
+        res_pubmed = buscar_pubmed(s_en) or []
+        res_arxiv = buscar_arxiv(s_en) or []
+        res_semantic = buscar_semantic_scholar(s_en) or []
+        res_crossref = buscar_crossref(s_pt) or []
+        res_doaj = buscar_doaj(s_pt) or []
+
+        lista_bruta = res_pubmed + res_arxiv + res_semantic + res_crossref + res_doaj
+
+        if not lista_bruta:
+            return jsonify({"error": "Nenhum artigo encontrado nas bases."}), 404
         
-        lista_bruta = artigos_pubmed + artigos_arxiv + artigos_crossref
-        
+        lista_para_filtrar = lista_bruta[:]
+
         artigos_finalizados = filtrar_artigos_ia_unificado(
-            c_en, c_pt, lista_bruta, client
+            c_en, c_pt, lista_para_filtrar, client
         )
 
         db = SessionLocal()

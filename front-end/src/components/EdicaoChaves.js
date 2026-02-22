@@ -71,7 +71,7 @@ const EdicaoChaves = ({ dadosBusca, aoFinalizarBusca }) => {
       </div>
 
       <button onClick={handleBuscarArtigos} disabled={carregando}>
-        {carregando ? "Extraindo e Filtrando Artigos..." : "Confirmar e Buscar Artigos"}
+        {carregando ? "Extraindo e Filtrando Artigos (pode levar 1 min)..." : "Confirmar e Buscar Artigos"}
       </button>
     </div>
   );

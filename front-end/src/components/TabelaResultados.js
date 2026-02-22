@@ -33,6 +33,9 @@ const TabelaResultados = ({ artigos, aoVoltar }) => {
                   <strong>Resumo:</strong> {art.resumo?.substring(0, 150)}...
                   <br /><br />
                   <strong>Justificativa:</strong> {art.justificativa}
+                  <span className={`badge-fonte ${art.fonte?.toLowerCase().replace(/\s/g, '-')}`}>
+                    {art.fonte}
+                  </span>
                 </td>
               </tr>
             ))

@@ -148,3 +148,17 @@ th {
   max-width: 400px; /* Evita que a tabela fique larga demais */
   font-size: 0.85em;
 }
+
+.badge-fonte {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.75em;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.pubmed { background-color: #e3f2fd; color: #1565c0; }
+.arxiv { background-color: #fff3e0; color: #e65100; }
+.crossref { background-color: #f3e5f5; color: #7b1fa2; }
+.semantic-scholar { background-color: #e8f5e9; color: #2e7d32; }
+.doaj { background-color: #ffebee; color: #c62828; }
