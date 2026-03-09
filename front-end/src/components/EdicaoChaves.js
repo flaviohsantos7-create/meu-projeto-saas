@@ -14,18 +14,24 @@ const EdicaoChaves = ({ dadosBusca, aoFinalizarBusca }) => {
   const handleBuscarArtigos = async () => {
     setCarregando(true);
     try {
-
+      // 1. Enviamos TODOS os parâmetros para o Back-end (Performance e Filtro)
       const response = await axios.post(`${API_URL}/buscar-artigos`, {
         id_busca: dadosBusca.id_busca,
         string_pt: stringPt,
         string_en: stringEn,
         contexto_pt: contextoPt,
-        contexto_en: contextoEn
+        contexto_en: contextoEn,
+        
+        // 2. NOVOS CAMPOS: Transportados do Questionário através do App.js
+        ano_inicio: dadosBusca.anoInicio,
+        limite_base: dadosBusca.limiteBase,
+        bases: dadosBusca.bases
       });
 
       aoFinalizarBusca(response.data); 
     } catch (error) {
-      alert("Erro na extração dos artigos. Verifique a conexão com as APIs.");
+      console.error("Erro na busca:", error);
+      alert("Erro na extração dos artigos. Verifique a conexão com o Back-end.");
     } finally {
       setCarregando(false);
     }
@@ -39,24 +45,24 @@ const EdicaoChaves = ({ dadosBusca, aoFinalizarBusca }) => {
       {/* BLOCO NACIONAL (Crossref / SciELO) */}
       <div className="campo">
         <label>Strings de busca (Português):</label>
-        <textarea 
+        <input
           type="text"
           value={stringPt} 
           onChange={(e) => setStringPt(e.target.value)} 
           rows="3"
-          placeholder="String para Crossref..."
+          placeholder="Preencher strings ou ajustar o escopo..."
         />
       </div>
 
       {/* BLOCO INTERNACIONAL (PubMed / arXiv) */}
       <div className="campo">
         <label>Strings de busca (Inglês):</label>
-        <textarea 
+        <input 
           type="text"
           value={stringEn} 
           onChange={(e) => setStringEn(e.target.value)} 
           rows="3"
-          placeholder="String para PubMed e arXiv..."
+          placeholder="Preencher strings ou ajustar o escopo..."
         />
       </div>
 
@@ -66,6 +72,7 @@ const EdicaoChaves = ({ dadosBusca, aoFinalizarBusca }) => {
           type="text"
           value={contextoPt} 
           onChange={(e) => setContextoPt(e.target.value)} 
+          placeholder="Preencher contexto ou ajustar o escopo..."
           rows="3"
         />
       </div>

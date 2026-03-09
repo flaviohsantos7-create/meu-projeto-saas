@@ -15,6 +15,7 @@ def buscar_arxiv(query_en, max_results=10):
             "resumo": entry.summary,
             "autores": ", ".join(author.name for author in entry.authors),
             "data": entry.published[:4],
+            "url": entry.id,
             "fonte": "arXiv"
         })
     return artigos

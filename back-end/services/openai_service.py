@@ -6,9 +6,12 @@ def gerar_estratégia_bilíngue(dados_brutos, client):
     problema = dados_brutos.get('problema', 'Não informado')
     termos = dados_brutos.get('termos', '')
     contexto = dados_brutos.get('contexto', '')
+    cenario = dados_brutos.get('cenario', 'Não especificado')
 
     prompt = f"""
     Como um especialista em bibliometria, analise o seguinte pedido de pesquisa:
+    Cenário de Aplicação: {cenario} 
+    Use este cenário para refinar a string booleana e o contexto.
     Tema: {tema}
     Problema: {problema}
     Termos: {termos}

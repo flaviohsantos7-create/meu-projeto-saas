@@ -21,12 +21,14 @@ def buscar_crossref(query_pt, max_results=10):
 
         autores = ", ".join([a.get('family', '') for a in item.get('author', [])])
         data_pub = str(item.get('published', {}).get('date-parts', [[0]])[0][0])
+        doi = item.get('DOI')
 
         artigos.append({
             "titulo": titulo,
             "resumo": resumo,
             "autores": autores,
             "data": data_pub,
+            "url": f"https://doi.org/{doi}" if doi else None,
             "fonte": "Crossref/SciELO"
         })
     return artigos

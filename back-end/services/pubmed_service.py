@@ -24,11 +24,14 @@ def buscar_detalhes_pubmed(id_list):
             nomes_autores = ", ".join([f"{a.get('LastName', '')} {a.get('Initials', '')}" for a in autores_list])
             data = article['MedlineCitation']['Article']['Journal']['JournalIssue']['PubDate'].get('Year', 'N/A')
 
+            pmid = article.get('MedlineCitation', {}).get('PMID', {}).get('#text')
+
             artigos_extraidos.append({
                 "titulo": titulo,
                 "resumo": resumo,
                 "autores": nomes_autores,
-                "data": data
+                "data": data,
+                "url": f"https://pubmed.ncbi.nlm.nih.gov/{pmid}/" if pmid else None,
             })
         except Exception as e:
             print(f"Erro ao processar um artigo: {e}")

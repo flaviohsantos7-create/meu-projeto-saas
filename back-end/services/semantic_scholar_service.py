@@ -17,6 +17,7 @@ def buscar_semantic_scholar(query_en, max_results=10):
                 "resumo": item.get('abstract') or "Resumo não disponível.",
                 "autores": ", ".join([a['name'] for a in item.get('authors', [])]),
                 "data": str(item.get('year', 'N/A')),
+                "url": item.get('url'),
                 "fonte": "Semantic Scholar"
             })
         return artigos
