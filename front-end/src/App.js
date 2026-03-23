@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import Questionario from './components/Questionario';
 import EdicaoChaves from './components/EdicaoChaves';
 import TabelaResultados from './components/TabelaResultados';
@@ -6,43 +7,117 @@ import './App.css';
 
 function App() {
   const [etapa, setEtapa] = useState(1);
+  const [sidebarAberta, setSidebarAberta] = useState(false); 
+  const [historico, setHistorico] = useState([]); 
   
-// Centralizamos o estado do formulário aqui para garantir a persistência (Ponto 3)
+  // ESTADOS DO MODAL
+  const [modal, setModal] = useState({ tipo: null, id: null });
+  const [inputRenomear, setInputRenomear] = useState("");
+
   const [formData, setFormData] = useState({
-    tema: '',
-    problema: '',
-    termos: '',
-    contexto_resumo: '',
-    cenario: '',
-    anoInicio: 2020,
-    limiteBase: 10,
-    bases: ['pubmed', 'arxiv', 'crossref', 'semantic', 'doaj']
+    tema: '', problema: '', termos: '', contexto_resumo: '', cenario: '',
+    anoInicio: 2020, limiteBase: 10, bases: ['pubmed', 'arxiv', 'crossref', 'semantic', 'doaj']
   });
 
   const [dadosBusca, setDadosBusca] = useState({
-    id_busca: null,
-    string_pt: '',
-    string_en: '',
-    contexto_pt: '',
-    contexto_en: ''
-  })
+    id_busca: null, string_pt: '', string_en: '', contexto_pt: '', contexto_en: ''
+  });
 
   const [artigosEncontrados, setArtigosEncontrados] = useState([]);
 
-  // 2. Função atualizada para capturar os dados do formulário e da IA
+  useEffect(() => {
+    carregarHistorico();
+  }, []);
+
+  const carregarHistorico = async () => {
+    try {
+      const response = await axios.get('http://127.0.0.1:5000/historico');
+      const historicoFormatado = response.data.map(item => ({
+        ...item, localNome: item.tema, oculto: false, fixado: false
+      }));
+      setHistorico(historicoFormatado);
+    } catch (error) {
+      console.error("Erro ao carregar histórico", error);
+    }
+  };
+
+  // --- GERENCIAMENTO DE MODAIS E AÇÕES ---
+
+  const fecharModal = () => {
+    setModal({ tipo: null, id: null });
+    setInputRenomear("");
+  };
+
+  // Excluir
+  const handleExcluir = (id, e) => {
+    e.stopPropagation();
+    setModal({ tipo: 'excluir', id: id });
+  };
+  const confirmarExcluir = () => {
+    setHistorico(hist => hist.map(h => h.id === modal.id ? { ...h, oculto: true } : h));
+    fecharModal();
+  };
+
+  // Renomear
+  const handleRenomear = (id, e) => {
+    e.stopPropagation();
+    const item = historico.find(h => h.id === id);
+    setInputRenomear(item ? item.localNome : "");
+    setModal({ tipo: 'renomear', id: id });
+  };
+  const confirmarRenomear = () => {
+    if (inputRenomear.trim() !== "") {
+      setHistorico(hist => hist.map(h => h.id === modal.id ? { ...h, localNome: inputRenomear } : h));
+    }
+    fecharModal();
+  };
+
+  // Fixar (Não precisa de modal)
+  const handleFixar = (id, e) => {
+    e.stopPropagation();
+    setHistorico(hist => hist.map(h => h.id === id ? { ...h, fixado: !h.fixado } : h));
+  };
+
+  // Compartilhar
+  const handleCompartilhar = (e) => {
+    e.stopPropagation();
+    setModal({ tipo: 'compartilhar', id: null });
+  };
+
+// Carregar Antiga (Agora com a rota real)
+  const carregarPesquisaAntiga = async (idBusca) => {
+    try {
+      // Opcional: Fechar a barra lateral para dar espaço à tabela
+      setSidebarAberta(false); 
+      
+      // Busca os artigos no Back-end
+      const response = await axios.get(`http://127.0.0.1:5000/busca/${idBusca}/artigos`);
+      
+      if (response.data && response.data.length > 0) {
+        // Alimenta a tabela e pula direto para a Etapa 3
+        setArtigosEncontrados(response.data);
+        setEtapa(3);
+      } else {
+        // Usa o nosso modal customizado para avisar se estiver vazio
+        setModal({ tipo: 'alertaVazio', id: idBusca });
+      }
+    } catch (error) {
+      console.error("Erro ao carregar pesquisa antiga:", error);
+      alert("Houve um erro de conexão com o servidor ao buscar os artigos.");
+    }
+  };
+
+  // --- FLUXO ORIGINAL DO SISTEMA ---
+  
   const iniciarEdicao = (resultadoIA, dadosForm) => {
     setDadosBusca({
-      id_busca: resultadoIA.id_busca,
-      string_pt: resultadoIA.string_pt,
-      string_en: resultadoIA.string_en,
-      contexto_pt: resultadoIA.contexto_pt,
-      contexto_en: resultadoIA.contexto_en,
-      // Preservamos o que o usuário escolheu no questionário
-      anoInicio: dadosForm.anoInicio,
-      limiteBase: dadosForm.limiteBase,
-      bases: dadosForm.bases
+      id_busca: resultadoIA.id_busca, string_pt: resultadoIA.string_pt,
+      string_en: resultadoIA.string_en, contexto_pt: resultadoIA.contexto_pt,
+      contexto_en: resultadoIA.contexto_en, anoInicio: dadosForm.anoInicio,
+      limiteBase: dadosForm.limiteBase, bases: dadosForm.bases
     });
     setEtapa(2);
+    carregarHistorico(); 
   };
 
   const mostrarResultados = (artigos) => {
@@ -55,43 +130,142 @@ function App() {
     setArtigosEncontrados([]);
   };
 
-  // Função para permitir voltar etapas (Requisito 5 da sua estratégia)
   const voltarEtapa = (novaEtapa) => {
     setEtapa(novaEtapa);
   };
 
+  const historicoVisivel = historico
+    .filter(h => !h.oculto)
+    .sort((a, b) => Number(b.fixado) - Number(a.fixado));
+
   return (
-    <div className="app-container">
-      <header className="main-header">
-        <h1>Buscador Acadêmico Inteligente</h1>
-        <div className="progress-bar">
-          <span className={etapa >= 1 ? "active" : ""} onClick={() => setEtapa(1)} style={{cursor: 'pointer'}}>1. Escopo</span>
-          <span className={etapa >= 2 ? "active" : ""} onClick={() => setEtapa(2)} style={{cursor: 'pointer'}}>2. Estratégia</span>
-          <span className={etapa >= 3 ? "active" : ""} onClick={() => setEtapa(3)} style={{cursor: 'pointer'}}>2. Resultados</span>
-          {/* <span className={etapa === 3 ? "active" : ""}>3. Resultados</span> */}
+    <div className="app-wrapper">
+      
+      {/* BARRA LATERAL GEMINI */}
+      <aside className={`sidebar-gemini ${sidebarAberta ? 'aberta' : 'fechada'}`}>
+        <div style={{ marginBottom: '20px' }}>
+          <button className="btn-hamburguer" onClick={() => setSidebarAberta(false)}>☰</button>
         </div>
-      </header>
 
-      <main className="content">
-        {etapa === 1 && (
-          <Questionario aoFinalizar={iniciarEdicao} />
+        <h3 style={{ fontSize: '1em', color: '#202124', marginBottom: '15px' }}>Recentes</h3>
+        
+        {historicoVisivel.length > 0 ? (
+          historicoVisivel.map((item) => (
+            <div key={item.id} className="historico-item" onClick={() => carregarPesquisaAntiga(item.id)}>
+              <div className="historico-item-header">
+                <span className="historico-titulo">
+                  {item.fixado && "📌 "} {item.localNome}
+                </span>
+              </div>
+              <span className="historico-data">{item.data}</span>
+              
+              <div className="historico-acoes">
+                <button className="btn-acao" onClick={(e) => handleFixar(item.id, e)} title="Fixar no Topo">📌</button>
+                <button className="btn-acao" onClick={(e) => handleRenomear(item.id, e)} title="Renomear">✏️</button>
+                <button className="btn-acao" onClick={(e) => handleCompartilhar(e)} title="Compartilhar">🔗</button>
+                <button className="btn-acao" onClick={(e) => handleExcluir(item.id, e)} title="Excluir" style={{color: '#d93025'}}>🗑️</button>
+              </div>
+            </div>
+          ))
+        ) : (
+          <p style={{ fontSize: '0.85em', color: '#999', whiteSpace: 'normal' }}>Nenhuma pesquisa para exibir.</p>
+        )}
+      </aside>
+
+      {/* CONTEÚDO PRINCIPAL */}
+      <div className="main-content-gemini">
+        {!sidebarAberta && (
+          <div style={{ position: 'absolute', top: '15px', left: '15px', zIndex: 10 }}>
+            <button className="btn-hamburguer" onClick={() => setSidebarAberta(true)}>☰</button>
+          </div>
         )}
 
-        {etapa === 2 && (
-          <EdicaoChaves 
-            dadosBusca={dadosBusca} 
-            aoFinalizarBusca={mostrarResultados} 
-            aoVoltar={() => voltarEtapa(1)}
-          />
-        )}
+        <div className="app-container" style={{ paddingTop: !sidebarAberta ? '50px' : '0' }}>
+          <header className="main-header">
+            <h1>Buscador Acadêmico Inteligente</h1>
+            <div className="progress-bar">
+              <span className={etapa >= 1 ? "active" : ""} onClick={() => setEtapa(1)} style={{cursor: 'pointer'}}>1. Escopo</span>
+              <span className={etapa >= 2 ? "active" : ""} onClick={() => setEtapa(2)} style={{cursor: 'pointer'}}>2. Estratégia</span>
+              <span className={etapa >= 3 ? "active" : ""} onClick={() => setEtapa(3)} style={{cursor: 'pointer'}}>3. Resultados</span>
+            </div>
+          </header>
 
-        {etapa === 3 && (
-          <TabelaResultados 
-            artigos={artigosEncontrados} 
-            aoVoltar={() => voltarEtapa(2)} 
-          />
-        )}
-      </main>
+          <main className="content">
+            {etapa === 1 && <Questionario aoFinalizar={iniciarEdicao} formData={formData} setFormData={setFormData} />}
+            {etapa === 2 && <EdicaoChaves dadosBusca={dadosBusca} aoFinalizarBusca={mostrarResultados} aoVoltar={() => voltarEtapa(1)} />}
+            {etapa === 3 && <TabelaResultados artigos={artigosEncontrados} aoVoltar={reiniciar} />}
+          </main>
+        </div>
+      </div>
+
+      {/* RENDERIZAÇÃO DOS MODAIS CUSTOMIZADOS */}
+      {modal.tipo && (
+        <div className="modal-overlay" onClick={fecharModal}>
+          {/* onClick={(e) => e.stopPropagation()} impede que clicar dentro da caixa feche o modal */}
+          <div className="modal-box" onClick={(e) => e.stopPropagation()}>
+            
+            {modal.tipo === 'excluir' && (
+              <>
+                <h3>Confirmar Exclusão</h3>
+                <p>Tem certeza que deseja remover esta pesquisa do seu histórico visual?</p>
+                <div className="modal-botoes">
+                  <button className="btn-cancelar" onClick={fecharModal}>Cancelar</button>
+                  <button className="btn-perigo" onClick={confirmarExcluir}>Excluir</button>
+                </div>
+              </>
+            )}
+
+            {modal.tipo === 'renomear' && (
+              <>
+                <h3>Renomear Pesquisa</h3>
+                <input
+                  type="text"
+                  value={inputRenomear}
+                  onChange={(e) => setInputRenomear(e.target.value)}
+                  autoFocus
+                  onKeyDown={(e) => e.key === 'Enter' && confirmarRenomear()}
+                />
+                <div className="modal-botoes">
+                  <button className="btn-cancelar" onClick={fecharModal}>Cancelar</button>
+                  <button className="btn-confirmar" onClick={confirmarRenomear}>Salvar</button>
+                </div>
+              </>
+            )}
+
+            {modal.tipo === 'compartilhar' && (
+              <>
+                <h3>Compartilhar Pesquisa</h3>
+                <p>Esta funcionalidade está em desenvolvimento e estará disponível em breve! 🚀</p>
+                <div className="modal-botoes">
+                  <button className="btn-confirmar" onClick={fecharModal}>Entendi</button>
+                </div>
+              </>
+            )}
+
+            {modal.tipo === 'alertaBackend' && (
+              <>
+                <h3>Carregar Tabela #{modal.id}</h3>
+                <p>Para exibir a tabela antiga, precisamos criar a rota no Back-end (Python).</p>
+                <div className="modal-botoes">
+                  <button className="btn-confirmar" onClick={fecharModal}>Entendido</button>
+                </div>
+              </>
+            )}
+
+            {modal.tipo === 'alertaVazio' && (
+              <>
+                <h3>Pesquisa Vazia</h3>
+                <p>Nenhum artigo foi salvo no banco de dados para esta pesquisa.</p>
+                <div className="modal-botoes">
+                  <button className="btn-confirmar" onClick={fecharModal}>Entendido</button>
+                </div>
+              </>
+            )}
+
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

@@ -1,3 +1,51 @@
+# from Bio import Entrez
+
+# Entrez.email = "flavio.h.santos7@aluno.senai.br"
+
+# def buscar_detalhes_pubmed(id_list):
+
+#     if not id_list:
+#         return []
+        
+#     ids = ",".join(id_list)
+#     handle = Entrez.efetch(db="pubmed", id=ids, retmode="xml")
+#     records = Entrez.read(handle)
+#     handle.close()
+    
+#     artigos_extraidos = []
+#     for article in records['PubmedArticle']:
+#         try:
+#             titulo = article['MedlineCitation']['Article']['ArticleTitle']
+            
+#             abstract_list = article['MedlineCitation']['Article'].get('Abstract', {}).get('AbstractText', ["Sem resumo disponível"])
+#             resumo = " ".join(abstract_list)
+            
+#             autores_list = article['MedlineCitation']['Article'].get('AuthorList', [])
+#             nomes_autores = ", ".join([f"{a.get('LastName', '')} {a.get('Initials', '')}" for a in autores_list])
+#             data = article['MedlineCitation']['Article']['Journal']['JournalIssue']['PubDate'].get('Year', 'N/A')
+
+#             pmid = article.get('MedlineCitation', {}).get('PMID', {}).get('#text')
+
+#             artigos_extraidos.append({
+#                 "titulo": titulo,
+#                 "resumo": resumo,
+#                 "autores": nomes_autores,
+#                 "data": data,
+#                 "url": f"https://pubmed.ncbi.nlm.nih.gov/{pmid}/" if pmid else None,
+#             })
+#         except Exception as e:
+#             print(f"Erro ao processar um artigo: {e}")
+            
+#     return artigos_extraidos
+
+# def executar_busca_completa(query, max_results=10):
+
+#     handle = Entrez.esearch(db="pubmed", term=query, retmax=max_results)
+#     record = Entrez.read(handle)
+#     handle.close()
+    
+#     return buscar_detalhes_pubmed(record['IdList'])
+
 from Bio import Entrez
 
 Entrez.email = "flavio.h.santos7@aluno.senai.br"
@@ -38,9 +86,11 @@ def buscar_detalhes_pubmed(id_list):
             
     return artigos_extraidos
 
-def executar_busca_completa(query, max_results=10):
+def executar_busca_completa(query, max_results=10, ano_limite=2020):
+    # Inclusão da restrição de data na string do PubMed
+    query_com_data = f'({query}) AND ("{ano_limite}/01/01"[Date - Publication] : "3000/12/31"[Date - Publication])'
 
-    handle = Entrez.esearch(db="pubmed", term=query, retmax=max_results)
+    handle = Entrez.esearch(db="pubmed", term=query_com_data, retmax=max_results)
     record = Entrez.read(handle)
     handle.close()
     

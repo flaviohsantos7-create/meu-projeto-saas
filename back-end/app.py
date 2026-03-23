@@ -79,37 +79,41 @@ def rota_buscar_artigos():
     id_busca = dados.get('id_busca')
     s_en, s_pt = dados.get('string_en'), dados.get('string_pt')
     c_en, c_pt = dados.get('contexto_en'), dados.get('contexto_pt')
+    
+    # Captura o ano escolhido no front-end
     ano_limite = dados.get('ano_inicio', 2020)
     bases_ativas = dados.get('bases', ['pubmed', 'arxiv', 'crossref', 'semantic', 'doaj'])
 
     artigos_brutos = []
     limite = int(dados.get('limite_base', 10))
 
-    def busca_segura(func, query, nome):
+    # MODIFICAÇÃO 1: Adicionamos o parâmetro 'ano' na função de segurança
+    def busca_segura(func, query, nome, ano):
         try:
-            return func(query, max_results=limite) or []
+            # Passamos o ano_limite explicitamente para o serviço
+            return func(query, max_results=limite, ano_limite=ano) or []
         except Exception as e:
             print(f"Aviso: Falha na base {nome}: {e}")
             return []
 
+    # MODIFICAÇÃO 2: Repassamos a variável 'ano_limite' em todas as chamadas
     if 'pubmed' in bases_ativas:
-        artigos_brutos += busca_segura(buscar_pubmed, dados.get('string_en'), "PubMed")
+        artigos_brutos += busca_segura(buscar_pubmed, s_en, "PubMed", ano_limite)
 
     if 'arxiv' in bases_ativas:
-        artigos_brutos += busca_segura(buscar_arxiv, dados.get('string_en'), "arXiv")
+        artigos_brutos += busca_segura(buscar_arxiv, s_en, "arXiv", ano_limite)
 
     if 'crossref' in bases_ativas:
-        artigos_brutos += busca_segura(buscar_crossref, dados.get('string_en'), "crossref")
+        artigos_brutos += busca_segura(buscar_crossref, s_en, "crossref", ano_limite)
 
     if 'semantic' in bases_ativas:
-        artigos_brutos += busca_segura(buscar_semantic_scholar, dados.get('string_en'), "semantic")
+        artigos_brutos += busca_segura(buscar_semantic_scholar, s_en, "semantic", ano_limite)
 
     if 'doaj' in bases_ativas:
-        artigos_brutos += busca_segura(buscar_doaj, dados.get('string_en'), "doaj")
-
+        artigos_brutos += busca_segura(buscar_doaj, s_en, "doaj", ano_limite)
 
     artigos_finalizados = filtrar_artigos_ia_unificado(
-        dados.get('contexto_en'), dados.get('contexto_pt'), artigos_brutos, client
+        c_en, c_pt, artigos_brutos, client
     )
 
     db = SessionLocal()
@@ -128,6 +132,51 @@ def rota_buscar_artigos():
         db.add(novo)
     db.commit()
     return jsonify(artigos_finalizados)
+#____________________________________________________________________________________________________________________________________________________
+@app.route('/historico', methods=['GET'])
+def rota_historico():
+    db = SessionLocal()
+    try:
+        buscas = db.query(Busca).order_by(Busca.id.desc()).limit(10).all()
+        resultado = []
+        for b in buscas:
+            resultado.append({
+                "id": b.id,
+                "tema": b.tema or "Sem tema",
+                "data": b.data_criacao.strftime("%d/%m/%Y") if b.data_criacao else ""
+            })
+        return jsonify(resultado)
+    except Exception as e:
+        print(f"Erro ao buscar histórico: {e}")
+        return jsonify([])
+    finally:
+        db.close()
+#____________________________________________________________________________________________________________________________________________________
+@app.route('/busca/<int:id_busca>/artigos', methods=['GET'])
+def rota_obter_artigos_antigos(id_busca):
+    db = SessionLocal()
+    try:
+        # Busca no banco todos os artigos que pertencem a esta ID de busca
+        artigos_salvos = db.query(Artigo).filter(Artigo.busca_id == id_busca).all()
+        
+        resultado = []
+        for art in artigos_salvos:
+            resultado.append({
+                "titulo": art.titulo,
+                "resumo": art.resumo,
+                "data": art.data_publicacao,
+                "nota": art.nota_compatibilidade,
+                "justificativa": art.justificativa_ia,
+                "fonte": art.fonte,
+                "url": art.url
+            })
+            
+        return jsonify(resultado)
+    except Exception as e:
+        print(f"Erro ao resgatar artigos da pesquisa {id_busca}: {e}")
+        return jsonify({"error": "Erro ao carregar artigos antigos"}), 500
+    finally:
+        db.close()
 #____________________________________________________________________________________________________________________________________________________
 if __name__ == '__main__':
     app.run(debug=True, port=5000)

@@ -64,7 +64,7 @@ def filtrar_artigos_ia_unificado(contexto_en, contexto_pt, artigos, client):
     {json.dumps(lista_simplificada, ensure_ascii=False)}
 
     TAREFA:
-    Para cada artigo, retorne uma nota (0-100) e uma justificativa de no máximo 15 palavras em Português. Seja direto e técnico
+    Para cada artigo, retorne uma nota (0-100) e uma justificativa de no máximo 40 palavras em Português. Seja direto e técnico
     
     RETORNO OBRIGATÓRIO (JSON):
     Retorne um objeto JSON com uma chave "avaliacoes" contendo uma lista de objetos:

@@ -2,18 +2,7 @@ import { API_URL } from '../api_config';
 import React, { useState } from 'react';
 import axios from 'axios';
 
-const Questionario = ({ aoFinalizar }) => {
-  // 1. Estado inicial com todos os novos campos
-  const [formData, setFormData] = useState({
-    tema: '',
-    problema: '',
-    termos: '',
-    contexto_resumo: '',
-    cenario: '',
-    anoInicio: 2020,
-    limiteBase: 10,
-    bases: ['pubmed', 'arxiv', 'crossref', 'semantic', 'doaj'] // Todas marcadas por padrão
-  });
+const Questionario = ({aoFinalizar, formData, setFormData}) => {
 
   const [carregando, setCarregando] = useState(false);
   const [mostrarAvancado, setMostrarAvancado] = useState(false); // Controle da "flechinha"
@@ -51,7 +40,7 @@ const Questionario = ({ aoFinalizar }) => {
         <label>Qual problema você está tentando resolver?</label>
         <input type="text" placeholder="..." value={formData.problema} onChange={(e) => setFormData({...formData, problema: e.target.value})} required />
 
-        <label style={{ marginTop: '20px' }}>Termos Obrigatórios:</label>
+        <label style={{ marginTop: '20px' }}>Termos Obrigatórios (Separados por Vigula):</label>
         <input type="text" placeholder="..." value={formData.termos} onChange={(e) => setFormData({...formData, termos: e.target.value})} />
 
         <label>Contexto do seu artigo (Resumo):</label>
