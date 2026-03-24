@@ -3,6 +3,7 @@ import axios from 'axios';
 import Questionario from './components/Questionario';
 import EdicaoChaves from './components/EdicaoChaves';
 import TabelaResultados from './components/TabelaResultados';
+import { API_URL } from './api_config'; // <-- Importação do Render
 import './App.css';
 
 function App() {
@@ -25,13 +26,18 @@ function App() {
 
   const [artigosEncontrados, setArtigosEncontrados] = useState([]);
 
+  // Rolar para o topo sempre que a etapa mudar
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [etapa]);
+
   useEffect(() => {
     carregarHistorico();
   }, []);
 
   const carregarHistorico = async () => {
     try {
-      const response = await axios.get('http://127.0.0.1:5000/historico');
+      const response = await axios.get(`${API_URL}/historico`); // <-- Alterado para o Render
       const historicoFormatado = response.data.map(item => ({
         ...item, localNome: item.tema, oculto: false, fixado: false
       }));
@@ -84,21 +90,26 @@ function App() {
     setModal({ tipo: 'compartilhar', id: null });
   };
 
-// Carregar Antiga (Agora com a rota real)
+  // Carregar Antiga
   const carregarPesquisaAntiga = async (idBusca) => {
     try {
-      // Opcional: Fechar a barra lateral para dar espaço à tabela
       setSidebarAberta(false); 
       
-      // Busca os artigos no Back-end
-      const response = await axios.get(`http://127.0.0.1:5000/busca/${idBusca}/artigos`);
+      // Limpa os dados das etapas anteriores
+      setFormData({
+        tema: '', problema: '', termos: '', contexto_resumo: '', cenario: '',
+        anoInicio: 2020, limiteBase: 10, bases: ['pubmed', 'arxiv', 'crossref', 'semantic', 'doaj']
+      });
+      setDadosBusca({
+        id_busca: null, string_pt: '', string_en: '', contexto_pt: '', contexto_en: ''
+      });
+      
+      const response = await axios.get(`${API_URL}/busca/${idBusca}/artigos`); // <-- Alterado para o Render
       
       if (response.data && response.data.length > 0) {
-        // Alimenta a tabela e pula direto para a Etapa 3
         setArtigosEncontrados(response.data);
         setEtapa(3);
       } else {
-        // Usa o nosso modal customizado para avisar se estiver vazio
         setModal({ tipo: 'alertaVazio', id: idBusca });
       }
     } catch (error) {
@@ -125,9 +136,21 @@ function App() {
     setEtapa(3);
   };
 
-  const reiniciar = () => {
+  // Função que limpa absolutamente tudo
+  const limparPesquisa = () => {
     setEtapa(1);
     setArtigosEncontrados([]);
+    setFormData({
+      tema: '', problema: '', termos: '', contexto_resumo: '', cenario: '',
+      anoInicio: 2020, limiteBase: 10, bases: ['pubmed', 'arxiv', 'crossref', 'semantic', 'doaj']
+    });
+    setDadosBusca({
+      id_busca: null, string_pt: '', string_en: '', contexto_pt: '', contexto_en: ''
+    });
+  };
+
+  const reiniciar = () => {
+    limparPesquisa();
   };
 
   const voltarEtapa = (novaEtapa) => {
@@ -191,7 +214,7 @@ function App() {
           </header>
 
           <main className="content">
-            {etapa === 1 && <Questionario aoFinalizar={iniciarEdicao} formData={formData} setFormData={setFormData} />}
+            {etapa === 1 && <Questionario aoFinalizar={iniciarEdicao} formData={formData} setFormData={setFormData} aoLimpar={limparPesquisa} />}
             {etapa === 2 && <EdicaoChaves dadosBusca={dadosBusca} aoFinalizarBusca={mostrarResultados} aoVoltar={() => voltarEtapa(1)} />}
             {etapa === 3 && <TabelaResultados artigos={artigosEncontrados} aoVoltar={reiniciar} />}
           </main>
@@ -201,7 +224,6 @@ function App() {
       {/* RENDERIZAÇÃO DOS MODAIS CUSTOMIZADOS */}
       {modal.tipo && (
         <div className="modal-overlay" onClick={fecharModal}>
-          {/* onClick={(e) => e.stopPropagation()} impede que clicar dentro da caixa feche o modal */}
           <div className="modal-box" onClick={(e) => e.stopPropagation()}>
             
             {modal.tipo === 'excluir' && (

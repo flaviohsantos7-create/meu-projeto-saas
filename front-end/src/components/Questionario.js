@@ -2,7 +2,7 @@ import { API_URL } from '../api_config';
 import React, { useState } from 'react';
 import axios from 'axios';
 
-const Questionario = ({aoFinalizar, formData, setFormData}) => {
+const Questionario = ({aoFinalizar, formData, setFormData, aoLimpar}) => {
 
   const [carregando, setCarregando] = useState(false);
   const [mostrarAvancado, setMostrarAvancado] = useState(false); // Controle da "flechinha"
@@ -99,11 +99,54 @@ const Questionario = ({aoFinalizar, formData, setFormData}) => {
               </div>
             </div>
           )}
-        </div>
+        </div>  
 
-        <button type="submit" disabled={carregando}>
-          {carregando ? "IA Processando..." : "Gerar Estratégia de Busca"}
-        </button>
+        {/* --- SEÇÃO DE BOTÕES CORRIGIDA --- */}
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', /* Joga um para cada extremo */
+          marginTop: '30px',
+          width: '100%'
+        }}>
+          {/* Botão Limpar: Canto inferior esquerdo, tamanho exato */}
+          <button 
+            type="button" 
+            onClick={aoLimpar} 
+            disabled={carregando} 
+            style={{ 
+              width: '228.8px', 
+              height: '43.2px',
+              backgroundColor: '#e74c3c', 
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: carregando ? 'not-allowed' : 'pointer',
+              opacity: carregando ? 0.6 : 1,
+              fontSize: '0.95em',
+              fontWeight: '500',
+              padding: 0 /* Zera o padding para garantir a medida exata */
+            }}
+          >
+            Limpar Pesquisa
+          </button>
+
+          {/* Botão Gerar: Canto inferior direito, tamanho exato */}
+          <button 
+            type="submit" 
+            disabled={carregando} 
+            style={{ 
+              width: '228.8px', 
+              height: '43.2px',
+              borderRadius: '4px',
+              cursor: carregando ? 'not-allowed' : 'pointer',
+              fontSize: '0.95em',
+              fontWeight: '500',
+              padding: 0 /* Zera o padding para garantir a medida exata */
+            }}
+          >
+            {carregando ? "IA Processando..." : "Gerar Estratégia de Busca"}
+          </button>
+        </div>
       </form>
     </div>
   );

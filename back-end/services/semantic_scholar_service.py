@@ -1,11 +1,20 @@
 # import requests
 
-# def buscar_semantic_scholar(query_en, max_results=10):
+# def buscar_semantic_scholar(query_en, max_results=10, ano_limite=2020):
 #     url = "https://api.semanticscholar.org/graph/v1/paper/search"
+    
+#     # LIMPEZA: Remove operadores booleanos para a API não travar (Erro 400)
+#     query_limpa = query_en.replace(" AND ", " ").replace(" OR ", " ").replace("(", "").replace(")", "").replace('"', '')
+    
+#     # Prevenção extra: a API falha com textos muito longos
+#     if len(query_limpa) > 100:
+#         query_limpa = query_limpa[:100]
+
 #     params = {
-#         "query": query_en,
+#         "query": query_limpa,
 #         "limit": max_results,
-#         "fields": "title,abstract,authors,year"
+#         "fields": "title,abstract,authors,year,url", 
+#         "year": f"{ano_limite}-" 
 #     }
 #     try:
 #         response = requests.get(url, params=params)
@@ -21,21 +30,31 @@
 #                 "fonte": "Semantic Scholar"
 #             })
 #         return artigos
-#     except:
+#     except Exception as e:
+#         print(f"Erro no Semantic Scholar: {e}")
 #         return []
 
 import requests
 
 def buscar_semantic_scholar(query_en, max_results=10, ano_limite=2020):
     url = "https://api.semanticscholar.org/graph/v1/paper/search"
+    
+    # LIMPEZA OBRIGATÓRIA: Remove operadores para a API não travar
+    query_limpa = query_en.replace(" AND ", " ").replace(" OR ", " ").replace("(", "").replace(")", "").replace('"', '')
+    
+    # CORREÇÃO PARA O SEMANTIC SCHOLAR: API rejeita queries muito grandes.
+    # Pegamos apenas as 5 primeiras palavras chave importantes para garantir resultados
+    palavras = query_limpa.split()
+    query_limpa = " ".join(palavras[:5])
+
     params = {
-        "query": query_en,
+        "query": query_limpa,
         "limit": max_results,
-        "fields": "title,abstract,authors,year,url", # Campo url incluído aqui
-        "year": f"{ano_limite}-" # Filtro: do ano limite em diante
+        "fields": "title,abstract,authors,year,url", 
+        "year": f"{ano_limite}-" 
     }
     try:
-        response = requests.get(url, params=params)
+        response = requests.get(url, params=params, timeout=10)
         data = response.json()
         artigos = []
         for item in data.get('data', []):
@@ -48,5 +67,6 @@ def buscar_semantic_scholar(query_en, max_results=10, ano_limite=2020):
                 "fonte": "Semantic Scholar"
             })
         return artigos
-    except:
+    except Exception as e:
+        print(f"Erro no Semantic Scholar: {e}")
         return []

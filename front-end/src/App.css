@@ -158,7 +158,7 @@ th {
 }
 .pubmed { background-color: #e3f2fd; color: #1565c0; }
 .arxiv { background-color: #fff3e0; color: #e65100; }
-.crossref { background-color: #f3e5f5; color: #7b1fa2; }
+.crossref-scielo { background-color: #f3e5f5; color: #7b1fa2; }
 .semantic-scholar { background-color: #e8f5e9; color: #2e7d32; }
 .doaj { background-color: #ffebee; color: #c62828; }
 
@@ -170,9 +170,11 @@ th {
 .app-wrapper {
   display: flex;
   min-height: 100vh;
-  width: 100vw;
+  width: 100%; /* CORREÇÃO: Trocado de 100vw para 100% para evitar scroll horizontal */
+  max-width: 100%;
   overflow-x: hidden;
   background-color: var(--bg);
+  position: relative; /* Garante que os elementos flutuantes respeitem esta caixa */
 }
 
 .sidebar-gemini {
@@ -343,3 +345,33 @@ th {
   background: #d93025; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; flex: 1; font-weight: 500;
 }
 .btn-perigo:hover { background: #c5221f; }
+
+/* --- RESPONSIVIDADE AVANÇADA (CELULARES E NOTEBOOKS) --- */
+@media (max-width: 900px) {
+  /* No celular/tablet, a barra lateral flutua por cima como um aplicativo nativo */
+  .sidebar-gemini.aberta {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    z-index: 1000;
+    box-shadow: 10px 0 25px rgba(0,0,0,0.5); /* Sombra mais forte para destacar a sobreposição */
+  }
+
+  /* Ajuste no padding do formulário em telas pequenas */
+  .container, .container-chaves {
+    padding: 20px;
+  }
+  
+  /* Os botões de ação do formulário ficam empilhados no celular para não espremer */
+  form > div[style*="justify-content: space-between"] {
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 20px !important;
+  }
+  
+  form > div[style*="justify-content: space-between"] button {
+    width: 100% !important; /* Os botões ocupam 100% da largura no celular */
+    height: 50px !important;
+  }
+}
