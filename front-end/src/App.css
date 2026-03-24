@@ -348,6 +348,10 @@ th {
     box-shadow: 10px 0 25px rgba(0,0,0,0.5); 
   }
 
+  .app-container {
+    padding-bottom: 120px; 
+  }
+
   .container, .container-chaves {
     padding: 20px;
   }
@@ -361,5 +365,25 @@ th {
   form > div[style*="justify-content: space-between"] button {
     width: 100% !important; 
     height: 50px !important;
+  }
+  /* Ajuste fino do cabeçalho da Tabela de Resultados no celular */
+  .header-tabela {
+    flex-direction: column !important; /* Empilha o título em cima dos botões */
+    align-items: flex-start !important; /* Alinha o título à esquerda */
+    gap: 15px; /* Cria um respiro entre o título e os botões */
+  }
+  
+  .header-tabela > div {
+    width: 100%; /* Faz a área dos botões ocupar a tela inteira */
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .header-tabela > div button {
+    flex: 1; /* Faz os dois botões dividirem o espaço 50/50 */
+    font-size: 0.85em !important; /* Reduz um pouquinho a fonte para não quebrar o texto */
+    padding: 12px 5px !important;
+    text-align: center;
+    white-space: nowrap; /* Impede que o texto do botão quebre em duas linhas */
   }
 }
