@@ -32,10 +32,12 @@ def gerar_estratégia_bilíngue(dados_brutos, client):
     }}
     """
     
+    # Adicionado temperature=0.1 para acelerar e dar respostas mais determinísticas
     response = client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[{"role": "user", "content": prompt}],
-        response_format={ "type": "json_object" }
+        response_format={ "type": "json_object" },
+        temperature=0.1
     )
     
 
@@ -51,7 +53,7 @@ def filtrar_artigos_ia_unificado(contexto_en, contexto_pt, artigos, client):
         lista_simplificada.append({
             "id_temp": i,
             "titulo": art['titulo'],
-            "resumo": art['resumo'][:500]
+            "resumo": art['resumo'][:400] # Otimizado: Reduzido de 500 para 400 para acelerar o processamento
         })
 
     prompt = f"""
@@ -78,7 +80,8 @@ def filtrar_artigos_ia_unificado(contexto_en, contexto_pt, artigos, client):
                 {"role": "system", "content": "Você é um assistente de pesquisa eficiente que responde apenas em JSON."},
                 {"role": "user", "content": prompt}
             ],
-            response_format={"type": "json_object"}
+            response_format={"type": "json_object"},
+            temperature=0.1 # Adicionado para forçar a IA a ir direto ao ponto rapidamente
         )
         
         resultado_ia = json.loads(response.choices[0].message.content)

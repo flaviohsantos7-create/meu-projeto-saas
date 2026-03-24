@@ -3,7 +3,7 @@ import axios from 'axios';
 import Questionario from './components/Questionario';
 import EdicaoChaves from './components/EdicaoChaves';
 import TabelaResultados from './components/TabelaResultados';
-import { API_URL } from './api_config'; // <-- Importação do Render
+import { API_URL } from './api_config'; 
 import './App.css';
 
 function App() {
@@ -11,7 +11,6 @@ function App() {
   const [sidebarAberta, setSidebarAberta] = useState(false); 
   const [historico, setHistorico] = useState([]); 
   
-  // ESTADOS DO MODAL
   const [modal, setModal] = useState({ tipo: null, id: null });
   const [inputRenomear, setInputRenomear] = useState("");
 
@@ -26,9 +25,12 @@ function App() {
 
   const [artigosEncontrados, setArtigosEncontrados] = useState([]);
 
-  // Rolar para o topo sempre que a etapa mudar
+  // Rolar para o topo do CONTEÚDO PRINCIPAL sempre que a etapa mudar
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    const mainContent = document.querySelector('.main-content-gemini');
+    if (mainContent) {
+      mainContent.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   }, [etapa]);
 
   useEffect(() => {
@@ -37,7 +39,7 @@ function App() {
 
   const carregarHistorico = async () => {
     try {
-      const response = await axios.get(`${API_URL}/historico`); // <-- Alterado para o Render
+      const response = await axios.get(`${API_URL}/historico`); 
       const historicoFormatado = response.data.map(item => ({
         ...item, localNome: item.tema, oculto: false, fixado: false
       }));
@@ -47,14 +49,11 @@ function App() {
     }
   };
 
-  // --- GERENCIAMENTO DE MODAIS E AÇÕES ---
-
   const fecharModal = () => {
     setModal({ tipo: null, id: null });
     setInputRenomear("");
   };
 
-  // Excluir
   const handleExcluir = (id, e) => {
     e.stopPropagation();
     setModal({ tipo: 'excluir', id: id });
@@ -64,7 +63,6 @@ function App() {
     fecharModal();
   };
 
-  // Renomear
   const handleRenomear = (id, e) => {
     e.stopPropagation();
     const item = historico.find(h => h.id === id);
@@ -78,24 +76,20 @@ function App() {
     fecharModal();
   };
 
-  // Fixar (Não precisa de modal)
   const handleFixar = (id, e) => {
     e.stopPropagation();
     setHistorico(hist => hist.map(h => h.id === id ? { ...h, fixado: !h.fixado } : h));
   };
 
-  // Compartilhar
   const handleCompartilhar = (e) => {
     e.stopPropagation();
     setModal({ tipo: 'compartilhar', id: null });
   };
 
-  // Carregar Antiga
   const carregarPesquisaAntiga = async (idBusca) => {
     try {
       setSidebarAberta(false); 
       
-      // Limpa os dados das etapas anteriores
       setFormData({
         tema: '', problema: '', termos: '', contexto_resumo: '', cenario: '',
         anoInicio: 2020, limiteBase: 10, bases: ['pubmed', 'arxiv', 'crossref', 'semantic', 'doaj']
@@ -104,7 +98,7 @@ function App() {
         id_busca: null, string_pt: '', string_en: '', contexto_pt: '', contexto_en: ''
       });
       
-      const response = await axios.get(`${API_URL}/busca/${idBusca}/artigos`); // <-- Alterado para o Render
+      const response = await axios.get(`${API_URL}/busca/${idBusca}/artigos`); 
       
       if (response.data && response.data.length > 0) {
         setArtigosEncontrados(response.data);
@@ -118,8 +112,6 @@ function App() {
     }
   };
 
-  // --- FLUXO ORIGINAL DO SISTEMA ---
-  
   const iniciarEdicao = (resultadoIA, dadosForm) => {
     setDadosBusca({
       id_busca: resultadoIA.id_busca, string_pt: resultadoIA.string_pt,
@@ -136,7 +128,6 @@ function App() {
     setEtapa(3);
   };
 
-  // Função que limpa absolutamente tudo
   const limparPesquisa = () => {
     setEtapa(1);
     setArtigosEncontrados([]);
@@ -198,9 +189,7 @@ function App() {
       {/* CONTEÚDO PRINCIPAL */}
       <div className="main-content-gemini">
         {!sidebarAberta && (
-          <div style={{ position: 'absolute', top: '15px', left: '15px', zIndex: 10 }}>
-            <button className="btn-hamburguer" onClick={() => setSidebarAberta(true)}>☰</button>
-          </div>
+          <button className="btn-hamburguer btn-hamburguer-fixo" onClick={() => setSidebarAberta(true)}>☰</button>
         )}
 
         <div className="app-container" style={{ paddingTop: !sidebarAberta ? '50px' : '0' }}>

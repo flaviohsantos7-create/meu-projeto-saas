@@ -45,11 +45,10 @@ const EdicaoChaves = ({ dadosBusca, aoFinalizarBusca }) => {
       {/* BLOCO NACIONAL (Crossref / SciELO) */}
       <div className="campo">
         <label>Strings de busca (Português):</label>
-        <input
-          type="text"
+        <textarea
           value={stringPt} 
           onChange={(e) => setStringPt(e.target.value)} 
-          rows="3"
+          rows="2"
           placeholder="Preencher strings ou ajustar o escopo..."
         />
       </div>
@@ -57,11 +56,10 @@ const EdicaoChaves = ({ dadosBusca, aoFinalizarBusca }) => {
       {/* BLOCO INTERNACIONAL (PubMed / arXiv) */}
       <div className="campo">
         <label>Strings de busca (Inglês):</label>
-        <input 
-          type="text"
+        <textarea 
           value={stringEn} 
           onChange={(e) => setStringEn(e.target.value)} 
-          rows="3"
+          rows="2"
           placeholder="Preencher strings ou ajustar o escopo..."
         />
       </div>
@@ -69,11 +67,10 @@ const EdicaoChaves = ({ dadosBusca, aoFinalizarBusca }) => {
       <div className="campo">
         <label>Contexto de Filtragem (IA):</label>
         <textarea 
-          type="text"
           value={contextoPt} 
           onChange={(e) => setContextoPt(e.target.value)} 
           placeholder="Preencher contexto ou ajustar o escopo..."
-          rows="3"
+          rows="4"
         />
       </div>
 

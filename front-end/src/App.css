@@ -11,6 +11,7 @@ body {
   background-color: var(--bg);
   color: var(--text);
   margin: 0;
+  overflow: hidden; /* Remove a rolagem geral da página */
 }
 
 .app-container {
@@ -51,6 +52,7 @@ label {
   font-weight: 600;
 }
 
+/* Modificado para que Textareas se pareçam com Inputs e rolem apenas na vertical */
 input, textarea {
   width: 100%;
   padding: 10px;
@@ -58,6 +60,12 @@ input, textarea {
   border: 1px solid #ddd;
   border-radius: 4px;
   box-sizing: border-box;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+textarea {
+  resize: vertical; /* Expande apenas para baixo */
+  min-height: 42px; /* Altura padrão de um input normal */
 }
 
 button {
@@ -145,7 +153,7 @@ th {
 }
 
 .coluna-resumo {
-  max-width: 400px; /* Evita que a tabela fique larga demais */
+  max-width: 400px;
   font-size: 0.85em;
 }
 
@@ -166,15 +174,15 @@ th {
 .nota-media { color: #f39c12; font-weight: bold; }
 .nota-baixa { color: #e74c3c; font-weight: bold; }
 
-/* --- LAYOUT GEMINI (BARRA RETRÁTIL) --- */
+/* --- LAYOUT GEMINI (BARRA RETRÁTIL E ROLAGENS) --- */
 .app-wrapper {
   display: flex;
-  min-height: 100vh;
-  width: 100%; /* CORREÇÃO: Trocado de 100vw para 100% para evitar scroll horizontal */
+  height: 100vh; /* Trava o tamanho máximo na tela do monitor */
+  width: 100%; 
   max-width: 100%;
-  overflow-x: hidden;
+  overflow: hidden; /* Impede a página principal de rolar */
   background-color: var(--bg);
-  position: relative; /* Garante que os elementos flutuantes respeitem esta caixa */
+  position: relative; 
 }
 
 .sidebar-gemini {
@@ -182,7 +190,8 @@ th {
   transition: width 0.3s ease, padding 0.3s ease;
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
+  height: 100vh;
+  overflow-y: auto; /* Rolagem independente apenas para a barra */
   overflow-x: hidden;
   white-space: nowrap;
   box-shadow: 2px 0 5px rgba(0,0,0,0.05);
@@ -201,9 +210,10 @@ th {
 
 .main-content-gemini {
   flex: 1;
+  height: 100vh;
+  overflow-y: auto; /* Rolagem independente apenas para o sistema/tabela */
   transition: margin 0.3s ease;
   position: relative;
-  overflow-y: auto;
   padding-top: 20px;
 }
 
@@ -225,7 +235,16 @@ th {
   background-color: #e8eaed;
 }
 
-/* Itens do Histórico */
+/* Novo Botão Hambúrguer Fixo/Flutuante */
+.btn-hamburguer-fixo {
+  position: fixed;
+  top: 15px;
+  left: 15px;
+  z-index: 1001; /* Fica acima de tudo, acompanhando a rolagem */
+  background-color: var(--bg); /* Garante que fique visível ao passar por cima da tabela */
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
 .historico-item {
   padding: 10px 15px;
   margin-bottom: 5px;
@@ -261,7 +280,6 @@ th {
   margin-top: 3px;
 }
 
-/* Menu de Ações Oculto (Aparece no Hover) */
 .historico-acoes {
   display: flex;
   gap: 8px;
@@ -292,11 +310,11 @@ th {
   position: fixed;
   top: 0; left: 0; width: 100vw; height: 100vh;
   background: rgba(0, 0, 0, 0.5);
-  z-index: 9999; /* Fica acima de tudo na tela */
+  z-index: 9999; 
   display: flex;
   justify-content: center;
   align-items: center;
-  backdrop-filter: blur(2px); /* Dá um efeito elegante de desfoque no fundo */
+  backdrop-filter: blur(2px); 
 }
 
 .modal-box {
@@ -308,62 +326,32 @@ th {
   text-align: center;
 }
 
-.modal-box h3 {
-  margin-top: 0;
-  color: var(--primary);
-  margin-bottom: 15px;
-}
+.modal-box h3 { margin-top: 0; color: var(--primary); margin-bottom: 15px; }
+.modal-box p { font-size: 0.9em; color: #555; margin-bottom: 20px; }
+.modal-box input { margin-bottom: 20px; font-size: 1em; }
+.modal-botoes { display: flex; justify-content: space-around; gap: 15px; }
 
-.modal-box p {
-  font-size: 0.9em;
-  color: #555;
-  margin-bottom: 20px;
-}
-
-.modal-box input {
-  margin-bottom: 20px;
-  font-size: 1em;
-}
-
-.modal-botoes {
-  display: flex;
-  justify-content: space-around;
-  gap: 15px;
-}
-
-.btn-cancelar {
-  background: #f1f3f4; color: #3c4043; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; flex: 1; font-weight: 500;
-}
+.btn-cancelar { background: #f1f3f4; color: #3c4043; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; flex: 1; font-weight: 500; }
 .btn-cancelar:hover { background: #e8eaed; }
-
-.btn-confirmar {
-  background: var(--secondary); color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; flex: 1; font-weight: 500;
-}
+.btn-confirmar { background: var(--secondary); color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; flex: 1; font-weight: 500; }
 .btn-confirmar:hover { background: #2980b9; }
-
-.btn-perigo {
-  background: #d93025; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; flex: 1; font-weight: 500;
-}
+.btn-perigo { background: #d93025; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; flex: 1; font-weight: 500; }
 .btn-perigo:hover { background: #c5221f; }
 
-/* --- RESPONSIVIDADE AVANÇADA (CELULARES E NOTEBOOKS) --- */
 @media (max-width: 900px) {
-  /* No celular/tablet, a barra lateral flutua por cima como um aplicativo nativo */
   .sidebar-gemini.aberta {
     position: fixed;
     top: 0;
     left: 0;
     height: 100vh;
     z-index: 1000;
-    box-shadow: 10px 0 25px rgba(0,0,0,0.5); /* Sombra mais forte para destacar a sobreposição */
+    box-shadow: 10px 0 25px rgba(0,0,0,0.5); 
   }
 
-  /* Ajuste no padding do formulário em telas pequenas */
   .container, .container-chaves {
     padding: 20px;
   }
   
-  /* Os botões de ação do formulário ficam empilhados no celular para não espremer */
   form > div[style*="justify-content: space-between"] {
     flex-direction: column;
     gap: 15px;
@@ -371,7 +359,7 @@ th {
   }
   
   form > div[style*="justify-content: space-between"] button {
-    width: 100% !important; /* Os botões ocupam 100% da largura no celular */
+    width: 100% !important; 
     height: 50px !important;
   }
 }

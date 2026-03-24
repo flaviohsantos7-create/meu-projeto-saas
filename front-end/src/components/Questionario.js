@@ -5,9 +5,8 @@ import axios from 'axios';
 const Questionario = ({aoFinalizar, formData, setFormData, aoLimpar}) => {
 
   const [carregando, setCarregando] = useState(false);
-  const [mostrarAvancado, setMostrarAvancado] = useState(false); // Controle da "flechinha"
+  const [mostrarAvancado, setMostrarAvancado] = useState(false); 
 
-  // Função para marcar/desmarcar bases
   const handleBaseChange = (base) => {
     const novasBases = formData.bases.includes(base)
       ? formData.bases.filter(b => b !== base)
@@ -19,9 +18,7 @@ const Questionario = ({aoFinalizar, formData, setFormData, aoLimpar}) => {
     e.preventDefault();
     setCarregando(true);
     try {
-      // Certifique-se de que o objeto enviado tem 'cenario' e 'anoInicio'
       const response = await axios.post(`${API_URL}/gerar-contexto`, formData);
-      // Passamos o formData completo para o App.js para não perder o Ano e Limite
       aoFinalizar(response.data, formData); 
     } catch (error) {
       alert("Erro ao conectar com o servidor.");
@@ -35,22 +32,22 @@ const Questionario = ({aoFinalizar, formData, setFormData, aoLimpar}) => {
       <h2>Início da Pesquisa Acadêmica</h2>
       <form onSubmit={handleSubmit}>
         <label>Qual o tema central da pesquisa?</label>
-        <input type="text" placeholder="..." value={formData.tema} onChange={(e) => setFormData({...formData, tema: e.target.value})} required />
+        <textarea rows="1" placeholder="..." value={formData.tema} onChange={(e) => setFormData({...formData, tema: e.target.value})} required />
 
         <label>Qual problema você está tentando resolver?</label>
-        <input type="text" placeholder="..." value={formData.problema} onChange={(e) => setFormData({...formData, problema: e.target.value})} required />
+        <textarea rows="1" placeholder="..." value={formData.problema} onChange={(e) => setFormData({...formData, problema: e.target.value})} required />
 
         <label style={{ marginTop: '20px' }}>Termos Obrigatórios (Separados por Vigula):</label>
-        <input type="text" placeholder="..." value={formData.termos} onChange={(e) => setFormData({...formData, termos: e.target.value})} />
+        <textarea rows="1" placeholder="..." value={formData.termos} onChange={(e) => setFormData({...formData, termos: e.target.value})} />
 
         <label>Contexto do seu artigo (Resumo):</label>
         <textarea
-          type="text" 
+          rows="3" 
           placeholder="..."
           value={formData.contexto_resumo}
           onChange={(e) => setFormData({...formData, contexto_resumo: e.target.value})} 
         />  
-        {/* 2. MENU RETRÁTIL DE CONFIGURAÇÕES */}
+        
         <div style={{ marginTop: '20px', border: '1px solid #ddd', borderRadius: '8px', padding: '10px' }}>
           <div 
             onClick={() => setMostrarAvancado(!mostrarAvancado)} 
@@ -75,7 +72,7 @@ const Questionario = ({aoFinalizar, formData, setFormData, aoLimpar}) => {
               </div>
 
               <label>Cenário de Aplicação:</label>
-             <input type="text" 
+             <textarea rows="1" 
              value={formData.cenario}
              placeholder="Ex: Indústria, Hospital, Escola, Software..."
              onChange={(e) => setFormData({...formData, cenario: e.target.value})}
@@ -101,14 +98,12 @@ const Questionario = ({aoFinalizar, formData, setFormData, aoLimpar}) => {
           )}
         </div>  
 
-        {/* --- SEÇÃO DE BOTÕES CORRIGIDA --- */}
         <div style={{ 
           display: 'flex', 
-          justifyContent: 'space-between', /* Joga um para cada extremo */
+          justifyContent: 'space-between', 
           marginTop: '30px',
           width: '100%'
         }}>
-          {/* Botão Limpar: Canto inferior esquerdo, tamanho exato */}
           <button 
             type="button" 
             onClick={aoLimpar} 
@@ -124,13 +119,12 @@ const Questionario = ({aoFinalizar, formData, setFormData, aoLimpar}) => {
               opacity: carregando ? 0.6 : 1,
               fontSize: '0.95em',
               fontWeight: '500',
-              padding: 0 /* Zera o padding para garantir a medida exata */
+              padding: 0 
             }}
           >
             Limpar Pesquisa
           </button>
 
-          {/* Botão Gerar: Canto inferior direito, tamanho exato */}
           <button 
             type="submit" 
             disabled={carregando} 
@@ -141,7 +135,7 @@ const Questionario = ({aoFinalizar, formData, setFormData, aoLimpar}) => {
               cursor: carregando ? 'not-allowed' : 'pointer',
               fontSize: '0.95em',
               fontWeight: '500',
-              padding: 0 /* Zera o padding para garantir a medida exata */
+              padding: 0 
             }}
           >
             {carregando ? "IA Processando..." : "Gerar Estratégia de Busca"}
