@@ -24,6 +24,9 @@ const TabelaResultados = ({ artigos, aoVoltar }) => {
   return (
     <div style={{ 
       width: 'max-content', 
+      maxWidth: '95vw', /* MANTÉM NA TELA: O frame não ultrapassa o tamanho do monitor/celular */
+      overflowX: 'auto', /* ROLAGEM INTELIGENTE: Cria rolagem interna se a tabela for muito grande */
+      boxSizing: 'border-box', /* Garante que o padding não quebre o tamanho */
       position: 'relative', 
       left: '50%', 
       transform: 'translateX(-50%)',
@@ -45,7 +48,6 @@ const TabelaResultados = ({ artigos, aoVoltar }) => {
       <table border="1" className="tabela-estilizada" style={{ borderCollapse: 'collapse' }}>
         <thead>
           <tr>
-            {/* whiteSpace: 'nowrap' proíbe a quebra de texto (ex: "Ano de" em cima, "Publicação" embaixo) */}
             <th style={{ textAlign: 'center', padding: '15px', whiteSpace: 'nowrap' }}>Nota</th>
             <th style={{ textAlign: 'center', padding: '15px', whiteSpace: 'nowrap' }}>Título do Artigo</th>
             <th style={{ textAlign: 'center', padding: '15px', whiteSpace: 'nowrap' }}>Resumo do Artigo</th>
@@ -72,7 +74,7 @@ const TabelaResultados = ({ artigos, aoVoltar }) => {
                 </td>
 
                 <td style={{ textAlign: 'center', padding: '15px', whiteSpace: 'nowrap' }}>
-                  <span className={`badge-fonte ${art.fonte ? art.fonte.toLowerCase().replace(/\s/g, '-') : ''}`}>
+                  <span className={`badge-fonte ${art.fonte ? art.fonte.toLowerCase().replace(/[\s/]+/g, '-') : ''}`}>
                     {art.fonte}
                   </span>
                 </td>

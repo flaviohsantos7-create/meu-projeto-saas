@@ -26,9 +26,9 @@ def gerar_estratégia_bilíngue(dados_brutos, client):
     Gere um JSON com a seguinte estrutura:
     {{
         "string_pt": "String booleana em português (ex: ('termo1' OR 'sinônimo') AND ('contexto1' OR 'contexto2'))",
-        "contexto_pt": "Resumo técnico do contexto em português para comparação",
+        "contexto_pt": "Resumo do contexto técnico em português para comparação e filtragem semântica, resumo bem estruturado com e rico em detalhes",
         "string_en": "String booleana em inglês técnico (ex: ('term1' OR 'synonym') AND ('context1' OR 'context2'))",
-        "contexto_en": "Technical context summary in English for semantic filtering"
+        "contexto_en": "Summary of the technical context in English for semantic comparison and filtering; a well-structured summary rich in detail"
     }}
     """
     
@@ -64,7 +64,7 @@ def filtrar_artigos_ia_unificado(contexto_en, contexto_pt, artigos, client):
     {json.dumps(lista_simplificada, ensure_ascii=False)}
 
     TAREFA:
-    Para cada artigo, retorne uma nota (0-100) e uma justificativa de no máximo 40 palavras em Português. Seja direto e técnico
+    Para cada artigo, retorne uma nota (0-100) e uma justificativa de no máximo 50 palavras em Português. Seja direto e técnico
     
     RETORNO OBRIGATÓRIO (JSON):
     Retorne um objeto JSON com uma chave "avaliacoes" contendo uma lista de objetos:

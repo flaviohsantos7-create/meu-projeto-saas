@@ -156,11 +156,11 @@ th {
   font-weight: bold;
   text-transform: uppercase;
 }
-.pubmed { background-color: #e3f2fd; color: #1565c0; }
-.arxiv { background-color: #fff3e0; color: #e65100; }
-.crossref-scielo { background-color: #f3e5f5; color: #7b1fa2; }
-.semantic-scholar { background-color: #e8f5e9; color: #2e7d32; }
-.doaj { background-color: #ffebee; color: #c62828; }
+.pubmed { background-color: #D5D5D5; color: #1565c0; }
+.arxiv { background-color: #B31B1B; color: #FFFFFF; }
+.crossref-scielo { background-color: #89191E; color: #FFFFFF; }
+.semantic-scholar { background-color: #2F85F7; color: #FFC72E; }
+.doaj { background-color: #982E0A; color: #FA9A87; }
 
 .nota-alta { color: #27ae60; font-weight: bold; }
 .nota-media { color: #f39c12; font-weight: bold; }
