@@ -7,3 +7,4 @@ gunicorn
 requests
 feedparser
 biopython
+psycopg2-binary
