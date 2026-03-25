@@ -5,6 +5,17 @@ import EdicaoChaves from './components/EdicaoChaves';
 import TabelaResultados from './components/TabelaResultados';
 import { API_URL } from './api_config'; 
 import './App.css';
+import Login from './components/Login';
+
+// --- INJETOR DE TOKEN DE SEGURANÇA ---
+// Isso garante que todas as requisições enviem o Token do usuário logado automaticamente
+axios.interceptors.request.use(config => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
 
 function App() {
   const [etapa, setEtapa] = useState(1);
@@ -24,6 +35,15 @@ function App() {
   });
 
   const [artigosEncontrados, setArtigosEncontrados] = useState([]);
+
+  const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('token'));
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('nomeUsuario');
+    setIsAuthenticated(false);
+    limparPesquisa();
+  };
 
   // Rolar para o topo do CONTEÚDO PRINCIPAL sempre que a etapa mudar
   useEffect(() => {
@@ -87,30 +107,38 @@ function App() {
   };
 
   const carregarPesquisaAntiga = async (idBusca) => {
-    try {
-      setSidebarAberta(false); 
-      
-      setFormData({
-        tema: '', problema: '', termos: '', contexto_resumo: '', cenario: '',
-        anoInicio: 2020, limiteBase: 10, bases: ['pubmed', 'arxiv', 'crossref', 'semantic', 'doaj']
-      });
-      setDadosBusca({
-        id_busca: null, string_pt: '', string_en: '', contexto_pt: '', contexto_en: ''
-      });
-      
-      const response = await axios.get(`${API_URL}/busca/${idBusca}/artigos`); 
-      
-      if (response.data && response.data.length > 0) {
-        setArtigosEncontrados(response.data);
-        setEtapa(3);
-      } else {
-        setModal({ tipo: 'alertaVazio', id: idBusca });
+      try {
+        setSidebarAberta(false); 
+        setModal({ tipo: null, id: null }); // Fecha modal se estiver aberto
+        
+        // --- CORREÇÃO: Força a rolagem para o topo imediatamente ao clicar no card ---
+        const mainContent = document.querySelector('.main-content-gemini');
+        if (mainContent) {
+          mainContent.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        // ----------------------------------------------------------------------------
+        
+        setFormData({
+          tema: '', problema: '', termos: '', contexto_resumo: '', cenario: '',
+          anoInicio: 2020, limiteBase: 10, bases: ['pubmed', 'arxiv', 'crossref', 'semantic', 'doaj']
+        });
+        setDadosBusca({
+          id_busca: null, string_pt: '', string_en: '', contexto_pt: '', contexto_en: ''
+        });
+        
+        const response = await axios.get(`${API_URL}/busca/${idBusca}/artigos`); 
+        
+        if (response.data && response.data.length > 0) {
+          setArtigosEncontrados(response.data);
+          setEtapa(3);
+        } else {
+          setModal({ tipo: 'alertaVazio', id: idBusca });
+        }
+      } catch (error) {
+        console.error("Erro ao carregar pesquisa antiga:", error);
+        alert("Houve um erro de conexão com o servidor.");
       }
-    } catch (error) {
-      console.error("Erro ao carregar pesquisa antiga:", error);
-      alert("Houve um erro de conexão com o servidor ao buscar os artigos.");
-    }
-  };
+    };
 
   const iniciarEdicao = (resultadoIA, dadosForm) => {
     setDadosBusca({
@@ -152,6 +180,10 @@ function App() {
     .filter(h => !h.oculto)
     .sort((a, b) => Number(b.fixado) - Number(a.fixado));
 
+  if (!isAuthenticated) {
+    return <Login onLogin={() => setIsAuthenticated(true)} />;
+  }
+
   return (
     <div className="app-wrapper">
       
@@ -163,27 +195,50 @@ function App() {
 
         <h3 style={{ fontSize: '1em', color: '#202124', marginBottom: '15px' }}>Recentes</h3>
         
-        {historicoVisivel.length > 0 ? (
-          historicoVisivel.map((item) => (
-            <div key={item.id} className="historico-item" onClick={() => carregarPesquisaAntiga(item.id)}>
-              <div className="historico-item-header">
-                <span className="historico-titulo">
-                  {item.fixado && "📌 "} {item.localNome}
-                </span>
+        {/* CONTAINER DO HISTÓRICO COM ROLAGEM PRÓPRIA */}
+        <div style={{ flex: 1, overflowY: 'auto', paddingRight: '5px' }}>
+          {historicoVisivel.length > 0 ? (
+            historicoVisivel.map((item) => (
+              <div key={item.id} className="historico-item" onClick={() => carregarPesquisaAntiga(item.id)}>
+                <div className="historico-item-header">
+                  <span className="historico-titulo">
+                    {item.fixado && "📌 "} {item.localNome}
+                  </span>
+                </div>
+                <span className="historico-data">{item.data}</span>
+                
+                <div className="historico-acoes">
+                  <button className="btn-acao" onClick={(e) => handleFixar(item.id, e)} title="Fixar no Topo">📌</button>
+                  <button className="btn-acao" onClick={(e) => handleRenomear(item.id, e)} title="Renomear">✏️</button>
+                  <button className="btn-acao" onClick={(e) => handleCompartilhar(e)} title="Compartilhar">🔗</button>
+                  <button className="btn-acao" onClick={(e) => handleExcluir(item.id, e)} title="Excluir" style={{color: '#d93025'}}>🗑️</button>
+                </div>
               </div>
-              <span className="historico-data">{item.data}</span>
-              
-              <div className="historico-acoes">
-                <button className="btn-acao" onClick={(e) => handleFixar(item.id, e)} title="Fixar no Topo">📌</button>
-                <button className="btn-acao" onClick={(e) => handleRenomear(item.id, e)} title="Renomear">✏️</button>
-                <button className="btn-acao" onClick={(e) => handleCompartilhar(e)} title="Compartilhar">🔗</button>
-                <button className="btn-acao" onClick={(e) => handleExcluir(item.id, e)} title="Excluir" style={{color: '#d93025'}}>🗑️</button>
-              </div>
-            </div>
-          ))
-        ) : (
-          <p style={{ fontSize: '0.85em', color: '#999', whiteSpace: 'normal' }}>Nenhuma pesquisa para exibir.</p>
-        )}
+            ))
+          ) : (
+            <p style={{ fontSize: '0.85em', color: '#999', whiteSpace: 'normal' }}>Nenhuma pesquisa para exibir.</p>
+          )}
+        </div>
+
+        {/* BOTÃO DE SAIR FIXO NO RODAPÉ */}
+        <div style={{ paddingTop: '15px', borderTop: '1px solid #ddd', textAlign: 'center', marginTop: '10px' }}>
+          <button 
+            onClick={handleLogout} 
+            style={{ 
+              background: 'none', 
+              color: '#d93025', 
+              border: 'none', 
+              fontWeight: 'bold', 
+              cursor: 'pointer',
+              fontSize: '0.95em',
+              width: '100%',
+              padding: '10px 0',
+              margin: 0
+            }}
+          >
+            🚪 Sair do Sistema
+          </button>
+        </div>
       </aside>
 
       {/* CONTEÚDO PRINCIPAL */}

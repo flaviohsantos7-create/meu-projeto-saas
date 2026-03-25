@@ -1,0 +1,158 @@
+/* src/components/Login.css */
+.login-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  width: 100vw;
+  background: linear-gradient(135deg, var(--bg) 0%, #d5e1eb 100%);
+}
+
+.login-card {
+  background: white;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+  transition: transform 0.3s ease;
+}
+
+.login-card h2 {
+  color: var(--primary);
+  margin-top: 0;
+  margin-bottom: 5px;
+}
+
+.login-card p {
+  color: #666;
+  font-size: 0.9em;
+  margin-bottom: 25px;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  text-align: left;
+}
+
+.login-form label {
+  margin-top: 0;
+  font-size: 0.85em;
+  color: #555;
+}
+
+.login-form input {
+  padding: 12px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  font-size: 1em;
+}
+
+.btn-login-submit {
+  background: var(--primary);
+  color: white;
+  padding: 14px;
+  border-radius: 6px;
+  font-weight: 600;
+  margin-top: 10px;
+  font-size: 1.05em;
+}
+
+.btn-login-submit:hover {
+  background: #1a252f;
+}
+
+.login-toggle {
+  margin-top: 20px;
+  font-size: 0.9em;
+  color: #666;
+}
+
+.login-toggle span {
+  color: var(--secondary);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.login-toggle span:hover {
+  text-decoration: underline;
+}
+
+.login-erro {
+  background: #fdecea;
+  color: #d93025;
+  padding: 10px;
+  border-radius: 6px;
+  font-size: 0.85em;
+  margin-bottom: 15px;
+}
+
+.login-sucesso {
+  background: #e6f4ea;
+  color: #1e8e3e;
+  padding: 10px;
+  border-radius: 6px;
+  font-size: 0.85em;
+  margin-bottom: 15px;
+}
+
+/* --- NOVA ESTILIZAÇÃO DA SENHA COM ÍCONE EMBUTIDO --- */
+
+/* 1. O container precisa ser relativo para ancorar o ícone */
+.senha-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+/* 2. O input de senha precisa de espaço na direita para o texto não bater no ícone */
+.senha-wrapper input {
+  width: 100%;
+  padding-right: 42px !important; /* Espaço sagrado para o ícone */
+  box-sizing: border-box;
+}
+
+/* 3. O botão do olhinho: transparente, sem bordas e posicionado cirurgicamente */
+.btn-olho {
+  position: absolute;
+  right: 12px; /* Distância exata da borda direita interna */
+  top: 50%;
+  transform: translateY(-50%); /* Centralização vertical perfeita */
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #757575; /* Cor cinza neutra para o ícone */
+  transition: color 0.2s;
+  z-index: 2; /* Garante que fique acima do input */
+}
+
+.btn-olho:hover {
+  color: var(--secondary); /* Muda para o azul do sistema no hover */
+}
+
+/* 4. Estilo do Ícone SVG (pequeno e limpo como na imagem) */
+.btn-olho svg {
+  width: 20px;  /* Tamanho pequeno e discreto */
+  height: 20px;
+}
+
+.btn-olho:focus, 
+.btn-olho:active {
+  outline: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+/* Remove o "piscar" azul de clique no celular */
+.btn-olho {
+  -webkit-tap-highlight-color: transparent;
+}

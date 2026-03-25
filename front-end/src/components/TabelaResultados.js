@@ -50,6 +50,7 @@ const TabelaResultados = ({ artigos, aoVoltar }) => {
           <tr>
             <th style={{ textAlign: 'center', padding: '15px', whiteSpace: 'nowrap' }}>Nota</th>
             <th style={{ textAlign: 'center', padding: '15px', whiteSpace: 'nowrap' }}>Título do Artigo</th>
+            <th style={{ textAlign: 'center', padding: '15px', whiteSpace: 'nowrap' }}>Principais Autores</th>
             <th style={{ textAlign: 'center', padding: '15px', whiteSpace: 'nowrap' }}>Resumo do Artigo</th>
             <th style={{ textAlign: 'center', padding: '15px', whiteSpace: 'nowrap' }}>Fonte</th>
             <th style={{ textAlign: 'center', padding: '15px', whiteSpace: 'nowrap' }}>Ano de Publicação</th>
@@ -67,6 +68,10 @@ const TabelaResultados = ({ artigos, aoVoltar }) => {
 
                 <td style={{ fontSize: '0.85em', padding: '15px', maxWidth: '250px' }}>
                   {art.titulo}
+                </td>
+
+                <td style={{ fontSize: '0.85em', padding: '15px', maxWidth: '250px' }}>
+                  {art.autores}
                 </td>
 
                 <td style={{ fontSize: '0.85em', padding: '15px', maxWidth: '400px' }}>

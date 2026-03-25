@@ -8,3 +8,5 @@ requests
 feedparser
 biopython
 psycopg2-binary
+Flask-JWT-Extended
+google-auth

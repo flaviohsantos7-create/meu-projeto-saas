@@ -52,6 +52,11 @@ label {
   font-weight: 600;
 }
 
+input[type="range"] {
+  accent-color: var(--secondary); /* Força a barra a ser sempre azul, não importa o dispositivo */
+  cursor: pointer;
+}
+
 /* Modificado para que Textareas se pareçam com Inputs e rolem apenas na vertical */
 input, textarea {
   width: 100%;
@@ -174,6 +179,23 @@ th {
 .nota-media { color: #f39c12; font-weight: bold; }
 .nota-baixa { color: #e74c3c; font-weight: bold; }
 
+/* --- CORES E LINHA LATERAL DA COLUNA DE NOTAS --- */
+.nota-alta { 
+  color: #27ae60; 
+  font-weight: bold; 
+  border-right: 0.3px solid #27ae60 !important; /* Cria a linha verde grossa à direita */
+}
+.nota-media { 
+  color: #f39c12; 
+  font-weight: bold; 
+  border-right: 0.3px solid #f39c12 !important; /* Cria a linha laranja grossa à direita */
+}
+.nota-baixa { 
+  color: #e74c3c; 
+  font-weight: bold; 
+  border-right: 0.3px solid #e74c3c !important; /* Cria a linha vermelha grossa à direita */
+}
+
 /* --- LAYOUT GEMINI (BARRA RETRÁTIL E ROLAGENS) --- */
 .app-wrapper {
   display: flex;
@@ -191,7 +213,8 @@ th {
   display: flex;
   flex-direction: column;
   height: 100vh;
-  overflow-y: auto; /* Rolagem independente apenas para a barra */
+  box-sizing: border-box; /* <-- ESSENCIAL: Mantém a barra exatamente no tamanho do monitor */
+  overflow-y: hidden; /* <-- Modificado para hidden, quem vai rolar é apenas o histórico */
   overflow-x: hidden;
   white-space: nowrap;
   box-shadow: 2px 0 5px rgba(0,0,0,0.05);

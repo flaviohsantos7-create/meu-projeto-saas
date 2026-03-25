@@ -13,9 +13,25 @@ if DATABASE_URL.startswith("postgres://"):
 
 Base = declarative_base()
 
+class Usuario(Base):
+    __tablename__ = "usuarios"
+    id = Column(Integer, primary_key=True, index=True)
+    nome = Column(String(100))
+    email = Column(String(150), unique=True, index=True)
+    senha_hash = Column(String(255))
+    data_cadastro = Column(DateTime, default=datetime.datetime.utcnow)
+
+class UserLog(Base):
+    __tablename__ = "user_logs"
+    id = Column(Integer, primary_key=True, index=True)
+    usuario_id = Column(Integer, ForeignKey("usuarios.id"))
+    data_acesso = Column(DateTime, default=datetime.datetime.utcnow)
+    ip_address = Column(String(50))
+
 class Busca(Base):
     __tablename__ = "buscas"
     id = Column(Integer, primary_key=True, index=True)
+    usuario_id = Column(Integer, ForeignKey("usuarios.id"), nullable=True) # nullable=True para não quebrar buscas antigas
     tema = Column(Text) # <--- CORREÇÃO AQUI (Antes era String(255))
     problema = Column(Text)
     termos_obrigatorios = Column(Text)
@@ -71,5 +87,6 @@ def init_db():
                 conn.execute(text("ALTER TABLE buscas ALTER COLUMN tema TYPE TEXT;"))
                 conn.execute(text("ALTER TABLE artigos ALTER COLUMN titulo TYPE TEXT;"))
                 conn.execute(text("ALTER TABLE artigos ALTER COLUMN autores TYPE TEXT;"))
+                conn.execute(text("ALTER TABLE buscas ADD COLUMN IF NOT EXISTS usuario_id INTEGER;"))
         except Exception as e:
             pass # Ignora silenciosamente se as tabelas não existirem ou já estiverem corrigidas
