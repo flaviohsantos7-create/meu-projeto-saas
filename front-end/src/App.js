@@ -27,7 +27,7 @@ function App() {
 
   const [formData, setFormData] = useState({
     tema: '', problema: '', termos: '', contexto_resumo: '', cenario: '',
-    anoInicio: 2020, limiteBase: 10, bases: ['pubmed', 'arxiv', 'crossref', 'semantic', 'doaj', 'scopus']
+    anoInicio: 2020, limiteBase: 10, bases: ['pubmed', 'arxiv', 'crossref', 'semantic', 'doaj', 'scopus', 'openalex']
   });
 
   const [dadosBusca, setDadosBusca] = useState({
@@ -120,7 +120,7 @@ function App() {
         
         setFormData({
           tema: '', problema: '', termos: '', contexto_resumo: '', cenario: '',
-          anoInicio: 2020, limiteBase: 10, bases: ['pubmed', 'arxiv', 'crossref', 'semantic', 'doaj', 'scopus']
+          anoInicio: 2020, limiteBase: 10, bases: ['pubmed', 'arxiv', 'crossref', 'semantic', 'doaj', 'scopus', 'openalex']
         });
         setDadosBusca({
           id_busca: null, string_pt: '', string_en: '', contexto_pt: '', contexto_en: ''
@@ -161,7 +161,7 @@ function App() {
     setArtigosEncontrados([]);
     setFormData({
       tema: '', problema: '', termos: '', contexto_resumo: '', cenario: '',
-      anoInicio: 2020, limiteBase: 10, bases: ['pubmed', 'arxiv', 'crossref', 'semantic', 'doaj', 'scopus']
+      anoInicio: 2020, limiteBase: 10, bases: ['pubmed', 'arxiv', 'crossref', 'semantic', 'doaj', 'scopus', 'openalex']
     });
     setDadosBusca({
       id_busca: null, string_pt: '', string_en: '', contexto_pt: '', contexto_en: ''
@@ -220,8 +220,8 @@ function App() {
           )}
         </div>
 
-        {/* BOTÃO DE SAIR FIXO NO RODAPÉ */}
-        <div style={{ paddingTop: '15px', borderTop: '1px solid #ddd', textAlign: 'center', marginTop: '10px' }}>
+        {/* BOTÃO DE SAIR FIXO NO RODAPÉ COM AJUSTE PARA CELULAR */}
+        <div style={{ paddingTop: '15px', paddingBottom: '45px', borderTop: '1px solid #ddd', textAlign: 'center', marginTop: '10px' }}>
           <button 
             onClick={handleLogout} 
             style={{ 

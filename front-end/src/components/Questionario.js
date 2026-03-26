@@ -80,7 +80,7 @@ const Questionario = ({aoFinalizar, formData, setFormData, aoLimpar}) => {
 
               <label>Selecione as Bases de Dados:</label>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginTop: '10px' }}>
-                {['Scopus','pubmed', 'arxiv', 'crossref', 'semantic', 'doaj'].map(base => (
+                {['scopus','openalex','pubmed', 'arxiv', 'crossref', 'semantic', 'doaj'].map(base => (
                   <div key={base} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <input 
                       type="checkbox" 
@@ -89,7 +89,13 @@ const Questionario = ({aoFinalizar, formData, setFormData, aoLimpar}) => {
                       style={{ width: 'auto', marginTop: 0 }}
                     />
                     <span style={{ fontSize: '0.9em', textTransform: 'capitalize' }}>
-                      {base} {base === 'pubmed' ? '(Saúde)' : base === 'semantic' ? '(Geral)' : ''}
+                      {base} {base === 'crossref' ? '- (Geral)' 
+                      : base === 'scopus' ? '- (Ciências/Engenharias)'
+                      : base === 'doaj' ? '- (Multidisciplinar)'  
+                      : base === 'pubmed' ? '- (Saúde/Biomédica)' 
+                      : base === 'openalex' ? '- (Ciência Mundial)'
+                      : base === 'arxiv' ? '- (Física/Matemática/Computação)'
+                      : base === 'semantic' ? '- (Computação/Biomedicina)' : ''}
                     </span>
                   </div>
                 ))}
