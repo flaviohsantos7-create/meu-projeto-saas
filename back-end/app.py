@@ -21,6 +21,7 @@ from services.crossref_service import buscar_crossref
 from services.semantic_scholar_service import buscar_semantic_scholar
 from services.doaj_service import buscar_doaj
 from services.openai_service import gerar_estratégia_bilíngue, filtrar_artigos_ia_unificado
+from services.scopus_service import buscar_scopus
 
 from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
@@ -285,6 +286,8 @@ def rota_buscar_artigos():
             tarefas.append(executor.submit(busca_segura, buscar_semantic_scholar, s_en, "semantic", ano_limite))
         if 'doaj' in bases_ativas:
             tarefas.append(executor.submit(busca_segura, buscar_doaj, s_en, "doaj", ano_limite))
+        if 'scopus' in bases_ativas:
+            tarefas.append(executor.submit(busca_segura, buscar_scopus, s_en, "Scopus", ano_limite))
         
         # À medida que cada API responde (independentemente da ordem), os artigos são adicionados
         for futuro in concurrent.futures.as_completed(tarefas):

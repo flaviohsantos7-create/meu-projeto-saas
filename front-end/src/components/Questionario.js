@@ -80,7 +80,7 @@ const Questionario = ({aoFinalizar, formData, setFormData, aoLimpar}) => {
 
               <label>Selecione as Bases de Dados:</label>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginTop: '10px' }}>
-                {['pubmed', 'arxiv', 'crossref', 'semantic', 'doaj'].map(base => (
+                {['Scopus','pubmed', 'arxiv', 'crossref', 'semantic', 'doaj'].map(base => (
                   <div key={base} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <input 
                       type="checkbox" 

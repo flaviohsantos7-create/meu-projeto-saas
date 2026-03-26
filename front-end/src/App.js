@@ -27,7 +27,7 @@ function App() {
 
   const [formData, setFormData] = useState({
     tema: '', problema: '', termos: '', contexto_resumo: '', cenario: '',
-    anoInicio: 2020, limiteBase: 10, bases: ['pubmed', 'arxiv', 'crossref', 'semantic', 'doaj']
+    anoInicio: 2020, limiteBase: 10, bases: ['pubmed', 'arxiv', 'crossref', 'semantic', 'doaj', 'scopus']
   });
 
   const [dadosBusca, setDadosBusca] = useState({
@@ -120,7 +120,7 @@ function App() {
         
         setFormData({
           tema: '', problema: '', termos: '', contexto_resumo: '', cenario: '',
-          anoInicio: 2020, limiteBase: 10, bases: ['pubmed', 'arxiv', 'crossref', 'semantic', 'doaj']
+          anoInicio: 2020, limiteBase: 10, bases: ['pubmed', 'arxiv', 'crossref', 'semantic', 'doaj', 'scopus']
         });
         setDadosBusca({
           id_busca: null, string_pt: '', string_en: '', contexto_pt: '', contexto_en: ''
@@ -161,7 +161,7 @@ function App() {
     setArtigosEncontrados([]);
     setFormData({
       tema: '', problema: '', termos: '', contexto_resumo: '', cenario: '',
-      anoInicio: 2020, limiteBase: 10, bases: ['pubmed', 'arxiv', 'crossref', 'semantic', 'doaj']
+      anoInicio: 2020, limiteBase: 10, bases: ['pubmed', 'arxiv', 'crossref', 'semantic', 'doaj', 'scopus']
     });
     setDadosBusca({
       id_busca: null, string_pt: '', string_en: '', contexto_pt: '', contexto_en: ''
