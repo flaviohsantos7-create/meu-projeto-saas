@@ -46,8 +46,9 @@ const EdicaoChaves = ({ dadosBusca, aoFinalizarBusca, setGlobalLoading }) => {
 
   return (
     <div className="container-chaves">
-      <h3>Revisão da Estratégia de Busca</h3>
-      <p>Você pode complementar ou retirar o que desejar antes da busca. Revise-as abaixo:</p>
+      <h2>Revisão da Estratégia de Busca</h2>
+      <p>Você pode complementar ou retirar o que desejar antes da busca.</p>
+      <p>Revise-as abaixo:</p>
 
       {/* BLOCO NACIONAL (Crossref / SciELO) */}
       <div className="campo">
@@ -57,7 +58,7 @@ const EdicaoChaves = ({ dadosBusca, aoFinalizarBusca, setGlobalLoading }) => {
           onChange={(e) => setStringPt(e.target.value)} 
           onInput={autoResize}
           rows="2"
-          placeholder="Preencher strings ou ajustar o escopo..."
+          placeholder="..."
         />
       </div>
 
@@ -69,7 +70,7 @@ const EdicaoChaves = ({ dadosBusca, aoFinalizarBusca, setGlobalLoading }) => {
           onChange={(e) => setStringEn(e.target.value)} 
           onInput={autoResize}
           rows="2"
-          placeholder="Preencher strings ou ajustar o escopo..."
+          placeholder="..."
         />
       </div>
 
@@ -79,13 +80,13 @@ const EdicaoChaves = ({ dadosBusca, aoFinalizarBusca, setGlobalLoading }) => {
           value={contextoPt} 
           onChange={(e) => setContextoPt(e.target.value)} 
           onInput={autoResize}
-          placeholder="Preencher contexto ou ajustar o escopo..."
+          placeholder="..."
           rows="4"
         />
       </div>
 
       <button onClick={handleBuscarArtigos} disabled={carregando}>
-        {carregando ? "Extraindo e Filtrando Artigos (pode levar 1 min)..." : "Confirmar e Buscar Artigos"}
+        {carregando ? "Agurde..." : "Confirmar e Buscar Artigos"}
       </button>
     </div>
   );

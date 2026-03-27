@@ -196,7 +196,7 @@ function App() {
           <button className="btn-hamburguer" onClick={() => setSidebarAberta(false)}>☰</button>
         </div>
 
-        <h3 style={{ fontSize: '1em', color: '#202124', marginBottom: '15px' }}>Recentes</h3>
+        <h3 style={{ fontSize: '1em', color: '#202124', marginBottom: '15px' }}>Pesquisas Recentes</h3>
         
         {/* CONTAINER DO HISTÓRICO COM ROLAGEM PRÓPRIA */}
         <div style={{ flex: 1, overflowY: 'auto', paddingRight: '5px' }}>

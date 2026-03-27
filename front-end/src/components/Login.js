@@ -87,7 +87,7 @@ const Login = ({ onLogin }) => {
           <h2>
             {modo === 'registro' ? 'Criar Conta' : 
              modo === 'esqueci' ? 'Recuperar Senha' : 
-             modo === 'reset' ? 'Nova Senha' : 'Bem-vindo ao Buscador Acadêmico'}
+             modo === 'reset' ? 'Nova Senha' : 'Bem-vindo ao Buscador Acadêmico Inteligente'}
           </h2>
           <p>
             {modo === 'registro' ? 'Cadastre-se para acessar o buscador' : 

@@ -38,7 +38,7 @@ const TabelaResultados = ({ artigos, aoVoltar }) => {
     }}>
       
       <div className="header-tabela" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-        <h3 style={{ margin: 0 }}>Tabela Resumida de Artigos Científicos</h3>
+        <h2 style={{ margin: 0 }}>Tabela Resumida de Artigos Científicos</h2>
         <div style={{ display: 'flex', gap: '10px' }}>
           <button className="btn-voltar" style={{ margin: 0 }} onClick={aoVoltar}>Nova Pesquisa</button>
           <button className="btn-excel" style={{ margin: 0 }} onClick={exportarExcel}>📊 Exportar Excel</button>
@@ -106,7 +106,8 @@ const TabelaResultados = ({ artigos, aoVoltar }) => {
               <td colSpan="8" style={{ textAlign: 'center', padding: '40px', color: '#999' }}>
                 <div className="feedback-vazio">
                   <strong>Nenhum artigo encontrado.</strong>
-                  <p>Tente ajustar os termos da sua busca ou o contexto semântico.</p>
+                  <p>Tente ajustar os termos da sua busca / contexto semântico.</p>
+                  <p>Ou faça uma Nova Pesquisa.</p>
                 </div>
               </td>
             </tr>

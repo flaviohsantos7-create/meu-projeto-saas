@@ -45,7 +45,7 @@ const Questionario = ({aoFinalizar, formData, setFormData, aoLimpar, setGlobalLo
         <label>Qual problema você está tentando resolver?</label>
         <textarea rows="1" placeholder="..." value={formData.problema} onInput={autoResize} onChange={(e) => setFormData({...formData, problema: e.target.value})} required />
 
-        <label style={{ marginTop: '20px' }}>Termos Obrigatórios (Separados por Vigula):</label>
+        <label style={{ marginTop: '20px' }}>Termos Obrigatórios (Separados por Vígula):</label>
         <textarea rows="1" placeholder="..." value={formData.termos} onInput={autoResize} onChange={(e) => setFormData({...formData, termos: e.target.value})} />
 
         <label>Contexto do seu artigo (Resumo):</label>
@@ -154,7 +154,7 @@ const Questionario = ({aoFinalizar, formData, setFormData, aoLimpar, setGlobalLo
               padding: 0 
             }}
           >
-            {carregando ? "IA Processando..." : "Gerar Estratégia de Busca"}
+            {carregando ? "Aguarde..." : "Gerar Estratégia de Busca"}
           </button>
         </div>
       </form>
