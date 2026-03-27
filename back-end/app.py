@@ -268,12 +268,23 @@ def rota_buscar_artigos():
             tema_pesquisa = busca_obj.tema
         db.close()
     
+<<<<<<< HEAD
     try:
         ano_limite = int(dados.get('anoInicio', 2020))
     except (ValueError, TypeError):
             ano_limite = 2020
 
     bases_ativas = dados.get('bases', ['pubmed', 'arxiv', 'crossref', 'semantic', 'doaj'])
+=======
+    # Captura o ano limite de forma segura (converte texto para número)
+    try:
+        ano_limite = int(dados.get('anoInicio', 2020))
+    except (ValueError, TypeError):
+        ano_limite = 2020 # Se vier vazio ou quebrado, usa 2020 como padrão
+
+    
+    bases_ativas = dados.get('bases', ['pubmed', 'arxiv', 'crossref', 'semantic', 'doaj','scopus','openalex'])
+>>>>>>> 5c8047b7ee8f7a4c1b372852e29ef6d5e38f2078
 
     artigos_brutos = []
     limite = int(dados.get('limite_base', 10))
