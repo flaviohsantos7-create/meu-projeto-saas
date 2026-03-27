@@ -46,6 +46,9 @@ def buscar_scopus(query, max_results=10, ano_limite=2020):
         entradas = dados.get("search-results", {}).get("entry", [])
         
         for item in entradas:
+            # Se a Scopus mandar um aviso de erro ou um artigo sem título, nós pulamos ele
+            if "error" in item or not item.get("dc:title"):
+                continue
             titulo = item.get("dc:title", "Título indisponível")
             resumo = item.get("dc:description", "Resumo completo restrito pela camada gratuita da Scopus.")
             autores = item.get("dc:creator", "Autores não informados")
