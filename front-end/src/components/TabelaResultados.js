@@ -103,7 +103,7 @@ const TabelaResultados = ({ artigos, aoVoltar }) => {
             ))
           ) : (
             <tr>
-              <td colSpan="7" style={{ textAlign: 'center', padding: '40px', color: '#999' }}>
+              <td colSpan="8" style={{ textAlign: 'center', padding: '40px', color: '#999' }}>
                 <div className="feedback-vazio">
                   <strong>Nenhum artigo encontrado.</strong>
                   <p>Tente ajustar os termos da sua busca ou o contexto semântico.</p>

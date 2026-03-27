@@ -43,7 +43,7 @@ def gerar_estratégia_bilíngue(dados_brutos, client):
 
     return json.loads(response.choices[0].message.content)
 #_________________________________________________________________________________________________________________________________________________
-def filtrar_artigos_ia_unificado(contexto_en, contexto_pt, artigos, client):
+def filtrar_artigos_ia_unificado(tema, contexto_en, contexto_pt, artigos, client):
 
     if not artigos:
         return []
@@ -53,21 +53,27 @@ def filtrar_artigos_ia_unificado(contexto_en, contexto_pt, artigos, client):
         lista_simplificada.append({
             "id_temp": i,
             "titulo": art['titulo'],
-            "resumo": art['resumo'][:400] # Otimizado: Reduzido de 500 para 400 para acelerar o processamento
+            "resumo": art['resumo'][:400] 
         })
 
     prompt = f"""
-    Você é um avaliador acadêmico. Analise a lista de artigos abaixo comparando-os com o escopo da pesquisa.
+    Você é um avaliador acadêmico rigoroso. Analise a lista de artigos comparando-os com a pesquisa do usuário.
     
-    ESCOPO (PT): {contexto_pt}
-    ESCOPO (EN): {contexto_en}
+    TEMA CENTRAL DA PESQUISA: {tema}
+    ESCOPO DE CONTEXTO (PT): {contexto_pt}
+    ESCOPO DE CONTEXTO (EN): {contexto_en}
 
     LISTA DE ARTIGOS:
     {json.dumps(lista_simplificada, ensure_ascii=False)}
 
     TAREFA:
-    Para cada artigo, retorne uma nota (0-100) e uma justificativa de no máximo 50 palavras em Português. Seja direto e técnico
+    Retorne uma nota (0-100) e uma justificativa (máximo 50 palavras em Português) para cada artigo.
     
+    REGRAS CRÍTICAS E INQUEBRÁVEIS:
+    1. É ESTRITAMENTE PROIBIDO dar nota 0 ou recusar a avaliação usando a desculpa de que "o resumo é restrito", "indisponível" ou "bloqueado".
+    2. Se o resumo for restrito (ex: artigos da Scopus) ou vazio, você DEVE ignorar o resumo e avaliar a nota EXCLUSIVAMENTE pela relação entre o TÍTULO do artigo e o TEMA CENTRAL.
+    3. Se avaliar apenas pelo título, a justificativa deve começar com: "Avaliando pelo título..." e explicar a conexão com o tema, mas somente se não tiver resumo disponível, se houver, avaliar com base no título e no resumo do artigo.
+
     RETORNO OBRIGATÓRIO (JSON):
     Retorne um objeto JSON com uma chave "avaliacoes" contendo uma lista de objetos:
     {{"avaliacoes": [ {{"id_temp": 0, "nota": 85, "justificativa": "..."}}, ... ]}}
@@ -81,7 +87,7 @@ def filtrar_artigos_ia_unificado(contexto_en, contexto_pt, artigos, client):
                 {"role": "user", "content": prompt}
             ],
             response_format={"type": "json_object"},
-            temperature=0.1 # Adicionado para forçar a IA a ir direto ao ponto rapidamente
+            temperature=0.1
         )
         
         resultado_ia = json.loads(response.choices[0].message.content)

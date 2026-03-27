@@ -18,10 +18,13 @@ axios.interceptors.request.use(config => {
 });
 
 function App() {
+
   const [etapa, setEtapa] = useState(1);
   const [sidebarAberta, setSidebarAberta] = useState(false); 
   const [historico, setHistorico] = useState([]); 
   
+  const [globalLoading, setGlobalLoading] = useState({ ativo: false, mensagem: "" });
+
   const [modal, setModal] = useState({ tipo: null, id: null });
   const [inputRenomear, setInputRenomear] = useState("");
 
@@ -220,22 +223,8 @@ function App() {
           )}
         </div>
 
-        {/* BOTÃO DE SAIR FIXO NO RODAPÉ COM AJUSTE PARA CELULAR */}
-        <div style={{ paddingTop: '15px', paddingBottom: '45px', borderTop: '1px solid #ddd', textAlign: 'center', marginTop: '10px' }}>
-          <button 
-            onClick={handleLogout} 
-            style={{ 
-              background: 'none', 
-              color: '#d93025', 
-              border: 'none', 
-              fontWeight: 'bold', 
-              cursor: 'pointer',
-              fontSize: '0.95em',
-              width: '100%',
-              padding: '10px 0',
-              margin: 0
-            }}
-          >
+        <div className="container-sair">
+          <button onClick={handleLogout} style={{ background: 'none', color: '#d93025', border: 'none', fontWeight: 'bold', cursor: 'pointer', fontSize: '0.95em', width: '100%', padding: '10px 0', margin: 0 }}>
             🚪 Sair do Sistema
           </button>
         </div>
@@ -258,8 +247,8 @@ function App() {
           </header>
 
           <main className="content">
-            {etapa === 1 && <Questionario aoFinalizar={iniciarEdicao} formData={formData} setFormData={setFormData} aoLimpar={limparPesquisa} />}
-            {etapa === 2 && <EdicaoChaves dadosBusca={dadosBusca} aoFinalizarBusca={mostrarResultados} aoVoltar={() => voltarEtapa(1)} />}
+            {etapa === 1 && <Questionario aoFinalizar={iniciarEdicao} formData={formData} setFormData={setFormData} aoLimpar={limparPesquisa} setGlobalLoading={setGlobalLoading} />}
+            {etapa === 2 && <EdicaoChaves dadosBusca={dadosBusca} aoFinalizarBusca={mostrarResultados} aoVoltar={() => voltarEtapa(1)} setGlobalLoading={setGlobalLoading} />}
             {etapa === 3 && <TabelaResultados artigos={artigosEncontrados} aoVoltar={reiniciar} />}
           </main>
         </div>
@@ -328,6 +317,17 @@ function App() {
               </>
             )}
 
+          </div>
+        </div>
+      )}
+
+      {/* ADICIONE O MODAL DE LOADING AQUI */}
+      {globalLoading.ativo && (
+        <div className="modal-overlay">
+          <div className="modal-loading-box">
+            <div className="spinner"></div>
+            <h3 style={{ margin: 0, color: '#2c3e50' }}>{globalLoading.mensagem}</h3>
+            <p style={{ margin: '10px 0 0 0', fontSize: '0.9em', color: '#7f8c8d' }}>Por favor aguarde...</p>
           </div>
         </div>
       )}

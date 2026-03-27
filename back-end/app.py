@@ -258,8 +258,21 @@ def rota_buscar_artigos():
     id_busca = dados.get('id_busca')
     s_en, s_pt = dados.get('string_en'), dados.get('string_pt')
     c_en, c_pt = dados.get('contexto_en'), dados.get('contexto_pt')
+
+    # BUSCA O TEMA NO BANCO DE DADOS PARA AJUDAR A IA
+    tema_pesquisa = "Tema não informado"
+    if id_busca:
+        db = SessionLocal()
+        busca_obj = db.query(Busca).filter(Busca.id == id_busca).first()
+        if busca_obj and busca_obj.tema:
+            tema_pesquisa = busca_obj.tema
+        db.close()
     
-    ano_limite = dados.get('ano_inicio', 2020)
+    try:
+        ano_limite = int(dados.get('anoInicio', 2020))
+    except (ValueError, TypeError):
+            ano_limite = 2020
+
     bases_ativas = dados.get('bases', ['pubmed', 'arxiv', 'crossref', 'semantic', 'doaj'])
 
     artigos_brutos = []
@@ -298,7 +311,7 @@ def rota_buscar_artigos():
     # --- FIM DA BUSCA PARALELA ---
 
     artigos_finalizados = filtrar_artigos_ia_unificado(
-        c_en, c_pt, artigos_brutos, client
+        tema_pesquisa, c_en, c_pt, artigos_brutos, client
     )
 
     db = SessionLocal()

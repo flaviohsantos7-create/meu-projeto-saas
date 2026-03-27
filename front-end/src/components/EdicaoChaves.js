@@ -2,7 +2,7 @@ import { API_URL } from '../api_config';
 import React, { useState } from 'react';
 import axios from 'axios';
 
-const EdicaoChaves = ({ dadosBusca, aoFinalizarBusca }) => {
+const EdicaoChaves = ({ dadosBusca, aoFinalizarBusca, setGlobalLoading }) => {
 
   const [stringPt, setStringPt] = useState(dadosBusca.string_pt || '');
   const [stringEn, setStringEn] = useState(dadosBusca.string_en || '');
@@ -11,8 +11,14 @@ const EdicaoChaves = ({ dadosBusca, aoFinalizarBusca }) => {
 
   const [carregando, setCarregando] = useState(false);
 
+  const autoResize = (e) => {
+    e.target.style.height = 'auto';
+    e.target.style.height = (e.target.scrollHeight) + 'px';
+  };
+
   const handleBuscarArtigos = async () => {
     setCarregando(true);
+    setGlobalLoading({ ativo: true, mensagem: "Extraindo e avaliando artigos (pode levar 1 min)..." });
     try {
       // 1. Enviamos TODOS os parâmetros para o Back-end (Performance e Filtro)
       const response = await axios.post(`${API_URL}/buscar-artigos`, {
@@ -34,6 +40,7 @@ const EdicaoChaves = ({ dadosBusca, aoFinalizarBusca }) => {
       alert("Erro na extração dos artigos. Verifique a conexão com o Back-end.");
     } finally {
       setCarregando(false);
+      setGlobalLoading({ ativo: false, mensagem: "" });
     }
   };
 
@@ -48,6 +55,7 @@ const EdicaoChaves = ({ dadosBusca, aoFinalizarBusca }) => {
         <textarea
           value={stringPt} 
           onChange={(e) => setStringPt(e.target.value)} 
+          onInput={autoResize}
           rows="2"
           placeholder="Preencher strings ou ajustar o escopo..."
         />
@@ -59,6 +67,7 @@ const EdicaoChaves = ({ dadosBusca, aoFinalizarBusca }) => {
         <textarea 
           value={stringEn} 
           onChange={(e) => setStringEn(e.target.value)} 
+          onInput={autoResize}
           rows="2"
           placeholder="Preencher strings ou ajustar o escopo..."
         />
@@ -69,6 +78,7 @@ const EdicaoChaves = ({ dadosBusca, aoFinalizarBusca }) => {
         <textarea 
           value={contextoPt} 
           onChange={(e) => setContextoPt(e.target.value)} 
+          onInput={autoResize}
           placeholder="Preencher contexto ou ajustar o escopo..."
           rows="4"
         />

@@ -2,10 +2,16 @@ import { API_URL } from '../api_config';
 import React, { useState } from 'react';
 import axios from 'axios';
 
-const Questionario = ({aoFinalizar, formData, setFormData, aoLimpar}) => {
+const Questionario = ({aoFinalizar, formData, setFormData, aoLimpar, setGlobalLoading}) => {
 
   const [carregando, setCarregando] = useState(false);
   const [mostrarAvancado, setMostrarAvancado] = useState(false); 
+
+  // ADICIONE ESTA FUNÇÃO AQUI:
+  const autoResize = (e) => {
+    e.target.style.height = 'auto';
+    e.target.style.height = (e.target.scrollHeight) + 'px';
+  };
 
   const handleBaseChange = (base) => {
     const novasBases = formData.bases.includes(base)
@@ -17,6 +23,7 @@ const Questionario = ({aoFinalizar, formData, setFormData, aoLimpar}) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setCarregando(true);
+    setGlobalLoading({ ativo: true, mensagem: "Analisando sua pesquisa com IA..." });
     try {
       const response = await axios.post(`${API_URL}/gerar-contexto`, formData);
       aoFinalizar(response.data, formData); 
@@ -24,6 +31,7 @@ const Questionario = ({aoFinalizar, formData, setFormData, aoLimpar}) => {
       alert("Erro ao conectar com o servidor.");
     } finally {
       setCarregando(false);
+      setGlobalLoading({ ativo: false, mensagem: "" });
     }
   };
 
@@ -32,18 +40,19 @@ const Questionario = ({aoFinalizar, formData, setFormData, aoLimpar}) => {
       <h2>Início da Pesquisa Acadêmica</h2>
       <form onSubmit={handleSubmit}>
         <label>Qual o tema central da pesquisa?</label>
-        <textarea rows="1" placeholder="..." value={formData.tema} onChange={(e) => setFormData({...formData, tema: e.target.value})} required />
+        <textarea rows="1" placeholder="..." value={formData.tema} onInput={autoResize} onChange={(e) => setFormData({...formData, tema: e.target.value})} required />
 
         <label>Qual problema você está tentando resolver?</label>
-        <textarea rows="1" placeholder="..." value={formData.problema} onChange={(e) => setFormData({...formData, problema: e.target.value})} required />
+        <textarea rows="1" placeholder="..." value={formData.problema} onInput={autoResize} onChange={(e) => setFormData({...formData, problema: e.target.value})} required />
 
         <label style={{ marginTop: '20px' }}>Termos Obrigatórios (Separados por Vigula):</label>
-        <textarea rows="1" placeholder="..." value={formData.termos} onChange={(e) => setFormData({...formData, termos: e.target.value})} />
+        <textarea rows="1" placeholder="..." value={formData.termos} onInput={autoResize} onChange={(e) => setFormData({...formData, termos: e.target.value})} />
 
         <label>Contexto do seu artigo (Resumo):</label>
         <textarea
           rows="3" 
           placeholder="..."
+          onInput={autoResize}
           value={formData.contexto_resumo}
           onChange={(e) => setFormData({...formData, contexto_resumo: e.target.value})} 
         />  
@@ -73,13 +82,14 @@ const Questionario = ({aoFinalizar, formData, setFormData, aoLimpar}) => {
 
               <label>Cenário de Aplicação:</label>
              <textarea rows="1" 
+             onInput={autoResize}
              value={formData.cenario}
              placeholder="Ex: Indústria, Hospital, Escola, Software..."
              onChange={(e) => setFormData({...formData, cenario: e.target.value})}
              />
 
               <label>Selecione as Bases de Dados:</label>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginTop: '10px' }}>
+              <div className="grid-bases">
                 {['scopus','openalex','pubmed', 'arxiv', 'crossref', 'semantic', 'doaj'].map(base => (
                   <div key={base} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <input 
