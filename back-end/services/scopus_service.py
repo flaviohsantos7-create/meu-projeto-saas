@@ -26,14 +26,18 @@ def buscar_scopus(query, max_results=10, ano_limite=2020):
     try:
         if scraper_key:
             # 1. Monta o link exato que a Elsevier precisa
-            url_alvo = f"{url_elsevier}?{urlencode(params)}"
+            req_preparada = requests.Request('GET', url_elsevier, params=params).prepare()
+            url_alvo = req_preparada.url
             
-            # 2. Enrola esse link dentro do túnel do ScraperAPI
-            # O keep_headers=true garante que a nossa chave da Scopus passe pelo túnel disfarçada
-            url_proxy = f"http://api.scraperapi.com?api_key={scraper_key}&url={quote(url_alvo)}&keep_headers=true&premium=true"
+            payload_proxy = {
+                'api_key': scraper_key,
+                'url': url_alvo,
+                'keep_headers': 'true',
+                'premium': 'true'
+            }
             
-            print("Buscando Scopus via Túnel Proxy Premium...")
-            response = requests.get(url_proxy, headers=headers, timeout=50)
+            print("Buscando Scopus via Túnel Proxy Premium (URL Segura)...")
+            response = requests.get("http://api.scraperapi.com", params=payload_proxy, headers=headers, timeout=50)
         else:
             # Se não tiver chave do túnel (ex: rodando no PC da faculdade), vai direto
             print("Buscando Scopus via conexão direta...")
