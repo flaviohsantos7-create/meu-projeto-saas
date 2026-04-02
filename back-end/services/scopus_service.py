@@ -35,13 +35,12 @@ def buscar_scopus(query, max_results=10, ano_limite=2020):
                 'keep_headers': 'true',
                 'premium': 'true'
             }
-            
             print("Buscando Scopus via Túnel Proxy Premium (Codificação Perfeita)...")
             response = requests.get("http://api.scraperapi.com", params=payload_proxy, headers=headers, timeout=50)
         else:
             # Se não tiver chave do túnel (ex: rodando no PC da faculdade), vai direto
             print("Buscando Scopus via conexão direta...")
-            response = requests.get(url_elsevier, headers=headers, params=params, timeout=15)
+            response = requests.get(url_elsevier, headers=headers, params=params, timeout=20)
             
         response.raise_for_status()
         dados = response.json()
