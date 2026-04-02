@@ -83,8 +83,8 @@ def login():
         novo_log = UserLog(
             usuario_id=usuario.id, 
             ip_address=request.remote_addr,
-            plataforma=request.user_agent.platform,
-            navegador=request.user_agent.browser
+            plataforma=request.user_agent.platform or "Desconhecido",
+            navegador=request.user_agent.browser or "Desconhecido"
         )
         db.add(novo_log)
         db.commit()
@@ -128,8 +128,8 @@ def google_login():
         novo_log = UserLog(
             usuario_id=usuario.id, 
             ip_address=request.remote_addr,
-            plataforma=request.user_agent.platform,
-            navegador=request.user_agent.browser
+            plataforma=request.user_agent.platform or "Desconhecido",
+            navegador=request.user_agent.browser or "Desconhecido"
         )
         db.add(novo_log)
         db.commit()
