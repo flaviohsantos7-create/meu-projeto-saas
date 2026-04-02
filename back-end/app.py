@@ -80,7 +80,12 @@ def login():
             return jsonify({"error": "E-mail ou senha incorretos"}), 401
             
         # Registra o Log de Acesso
-        novo_log = UserLog(usuario_id=usuario.id, ip_address=request.remote_addr)
+        novo_log = UserLog(
+            usuario_id=usuario.id, 
+            ip_address=request.remote_addr,
+            plataforma=request.user_agent.platform,
+            navegador=request.user_agent.browser
+        )
         db.add(novo_log)
         db.commit()
         
@@ -120,7 +125,12 @@ def google_login():
             db.refresh(usuario)
             
         # Registra o Log
-        novo_log = UserLog(usuario_id=usuario.id, ip_address=request.remote_addr)
+        novo_log = UserLog(
+            usuario_id=usuario.id, 
+            ip_address=request.remote_addr,
+            plataforma=request.user_agent.platform,
+            navegador=request.user_agent.browser
+        )
         db.add(novo_log)
         db.commit()
         
@@ -214,7 +224,7 @@ def rota_gerar_contexto():
     try:
         nova_busca = Busca(
             usuario_id=get_jwt_identity(),
-            tema=dados.get('tema'),
+            tema=estrategia.get('titulo_historico', dados.get('tema')),
             problema=dados.get('problema'),
             termos_obrigatorios=dados.get('termos'),
 

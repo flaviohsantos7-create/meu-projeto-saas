@@ -24,7 +24,7 @@ function App() {
   const [historico, setHistorico] = useState([]); 
   
   const [globalLoading, setGlobalLoading] = useState({ ativo: false, mensagem: "" });
-
+  const [idBuscaAtiva, setIdBuscaAtiva] = useState(null);
   const [modal, setModal] = useState({ tipo: null, id: null });
   const [inputRenomear, setInputRenomear] = useState("");
 
@@ -113,6 +113,7 @@ function App() {
       try {
         setSidebarAberta(false); 
         setModal({ tipo: null, id: null }); // Fecha modal se estiver aberto
+        setIdBuscaAtiva(idBusca);
         
         // --- CORREÇÃO: Força a rolagem para o topo imediatamente ao clicar no card ---
         const mainContent = document.querySelector('.main-content-gemini');
@@ -144,6 +145,7 @@ function App() {
     };
 
   const iniciarEdicao = (resultadoIA, dadosForm) => {
+    setIdBuscaAtiva(resultadoIA.id_busca);
     setDadosBusca({
       id_busca: resultadoIA.id_busca, string_pt: resultadoIA.string_pt,
       string_en: resultadoIA.string_en, contexto_pt: resultadoIA.contexto_pt,
@@ -161,6 +163,7 @@ function App() {
 
   const limparPesquisa = () => {
     setEtapa(1);
+    setIdBuscaAtiva(null);
     setArtigosEncontrados([]);
     setFormData({
       tema: '', problema: '', termos: '', contexto_resumo: '', cenario: '',
@@ -202,7 +205,7 @@ function App() {
         <div style={{ flex: 1, overflowY: 'auto', paddingRight: '5px' }}>
           {historicoVisivel.length > 0 ? (
             historicoVisivel.map((item) => (
-              <div key={item.id} className="historico-item" onClick={() => carregarPesquisaAntiga(item.id)}>
+              <div key={item.id} className={`historico-item ${idBuscaAtiva === item.id ? 'ativo' : ''}`} onClick={() => carregarPesquisaAntiga(item.id)}>
                 <div className="historico-item-header">
                   <span className="historico-titulo">
                     {item.fixado && "📌 "} {item.localNome}

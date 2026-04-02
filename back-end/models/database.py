@@ -1,7 +1,7 @@
 import os
 from sqlalchemy import create_engine, Column, Integer, String, Text, DateTime, ForeignKey, text
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, relationship
 import datetime
 
 # Puxa a URL da nuvem (Render/Neon). Se não encontrar, usa o SQLite local de forma segura.
@@ -20,6 +20,8 @@ class Usuario(Base):
     email = Column(String(150), unique=True, index=True)
     senha_hash = Column(String(255))
     data_cadastro = Column(DateTime, default=datetime.datetime.utcnow)
+    
+    logs = relationship("UserLog", back_populates="usuario")
 
 class UserLog(Base):
     __tablename__ = "user_logs"
@@ -27,6 +29,10 @@ class UserLog(Base):
     usuario_id = Column(Integer, ForeignKey("usuarios.id"))
     data_acesso = Column(DateTime, default=datetime.datetime.utcnow)
     ip_address = Column(String(50))
+    plataforma = Column(String(50)) # Captura Ex: windows, macos, android
+    navegador = Column(String(50))  # Captura Ex: chrome, firefox, safari
+    
+    usuario = relationship("Usuario", back_populates="logs")
 
 class Busca(Base):
     __tablename__ = "buscas"
@@ -79,8 +85,7 @@ def init_db():
     Base.metadata.create_all(bind=engine)
     
     # --- AUTO-MIGRATOR (CORREÇÃO DO NEON) ---
-    # Força o banco de dados na nuvem a converter as colunas de VARCHAR para TEXT 
-    # para aceitar os textareas grandes que adicionamos na versão anterior.
+    # Força o banco de dados na nuvem a converter as colunas e adicionar campos novos.
     if "postgres" in DATABASE_URL:
         try:
             with engine.begin() as conn: # engine.begin() faz o auto-commit de segurança
@@ -88,5 +93,7 @@ def init_db():
                 conn.execute(text("ALTER TABLE artigos ALTER COLUMN titulo TYPE TEXT;"))
                 conn.execute(text("ALTER TABLE artigos ALTER COLUMN autores TYPE TEXT;"))
                 conn.execute(text("ALTER TABLE buscas ADD COLUMN IF NOT EXISTS usuario_id INTEGER;"))
+                conn.execute(text("ALTER TABLE user_logs ADD COLUMN IF NOT EXISTS plataforma VARCHAR(50);"))
+                conn.execute(text("ALTER TABLE user_logs ADD COLUMN IF NOT EXISTS navegador VARCHAR(50);"))
         except Exception as e:
             pass # Ignora silenciosamente se as tabelas não existirem ou já estiverem corrigidas

@@ -420,7 +420,7 @@ th {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
-  marginTop: 10px;
+  marginTop: 20px;
 }
 
 /* --- CONTAINER DO BOTÃO DE SAIR RESPONSIVO --- */
@@ -489,4 +489,12 @@ th {
 /* 3. Aplica a animação no botão fixo (adicione esta linha na classe que você já tem) */
 .btn-hamburguer-fixo {
   animation: aparecerSemFantasma 0.4s ease forwards;
+}
+
+/* --- ITEM ATIVO NO HISTÓRICO --- */
+.historico-item.ativo {
+  background-color: #e8f0fe;
+  border-left: 4px solid var(--secondary);
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
 }

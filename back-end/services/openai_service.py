@@ -11,7 +11,6 @@ def gerar_estratégia_bilíngue(dados_brutos, client):
     prompt = f"""
     Como um especialista em bibliometria, analise o seguinte pedido de pesquisa:
     Cenário de Aplicação: {cenario} 
-    Use este cenário para refinar a string booleana e o contexto.
     Tema: {tema}
     Problema: {problema}
     Termos: {termos}
@@ -22,9 +21,11 @@ def gerar_estratégia_bilíngue(dados_brutos, client):
     2. Use o operador 'AND' APENAS para conectar conceitos diferentes (ex: Tema AND Tecnologia AND Localização).
     3. Evite strings restritivas demais. Se o usuário forneceu termos variados para o mesmo conceito, eles DEVEM estar entre parênteses unidos por 'OR'.
     4. Garanta que a string em inglês utilize termos técnicos (MeSH/Emtree) quando apropriado.
+    5. Crie um título bem curto (máximo 5 palavras) que resuma o NÚCLEO da pesquisa para ser usado no histórico do sistema.
 
     Gere um JSON com a seguinte estrutura:
     {{
+        "titulo_historico": "Um título curto e direto (máximo 5 palavras) que resuma o núcleo central da pesquisa",
         "string_pt": "String booleana em português (ex: ('termo1' OR 'sinônimo') AND ('contexto1' OR 'contexto2'))",
         "contexto_pt": "Resumo do contexto técnico em português para comparação e filtragem semântica, resumo bem estruturado com e rico em detalhes",
         "string_en": "String booleana em inglês técnico (ex: ('term1' OR 'synonym') AND ('context1' OR 'context2'))",
@@ -32,7 +33,6 @@ def gerar_estratégia_bilíngue(dados_brutos, client):
     }}
     """
     
-    # Adicionado temperature=0.1 para acelerar e dar respostas mais determinísticas
     response = client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[{"role": "user", "content": prompt}],
@@ -40,24 +40,37 @@ def gerar_estratégia_bilíngue(dados_brutos, client):
         temperature=0.1
     )
     
-
     return json.loads(response.choices[0].message.content)
+
 #_________________________________________________________________________________________________________________________________________________
+
 def filtrar_artigos_ia_unificado(tema, contexto_en, contexto_pt, artigos, client):
 
     if not artigos:
         return []
 
     lista_simplificada = []
+    
+    # TRUQUE DE ENGENHARIA: Pré-processamento cego para a IA
+    termos_bloqueio = ["restrito", "indisponível", "não disponível", "não informados"]
+    
     for i, art in enumerate(artigos):
+        resumo_atual = art.get('resumo', '')
+        
+        # Se o Python detectar que é um resumo falso/bloqueado, injeta o comando direto
+        if not resumo_atual or any(termo in resumo_atual.lower() for termo in termos_bloqueio):
+            resumo_ia = "[SEM RESUMO - AVALIAR ESTE ARTIGO EXCLUSIVAMENTE PELO TITULO]"
+        else:
+            resumo_ia = resumo_atual[:400]
+
         lista_simplificada.append({
             "id_temp": i,
-            "titulo": art['titulo'],
-            "resumo": art['resumo'][:400] 
+            "titulo": art.get('titulo', ''),
+            "resumo": resumo_ia
         })
 
     prompt = f"""
-    Você é um avaliador acadêmico rigoroso. Analise a lista de artigos comparando-os com a pesquisa do usuário.
+    Você é um avaliador acadêmico implacável. Avalie a relevância de cada artigo em relação ao escopo da pesquisa.
     
     TEMA CENTRAL DA PESQUISA: {tema}
     ESCOPO DE CONTEXTO (PT): {contexto_pt}
@@ -66,16 +79,22 @@ def filtrar_artigos_ia_unificado(tema, contexto_en, contexto_pt, artigos, client
     LISTA DE ARTIGOS:
     {json.dumps(lista_simplificada, ensure_ascii=False)}
 
-    TAREFA:
-    Retorne uma nota (0-100) e uma justificativa (máximo 50 palavras em Português) para cada artigo.
+    ALGORITMO DE AVALIAÇÃO OBRIGATÓRIO (PASSO A PASSO):
+    Para cada artigo, verifique a chave "resumo" e aplique OBRIGATORIAMENTE um dos dois cenários:
     
-    REGRAS CRÍTICAS E INQUEBRÁVEIS:
-    1. É ESTRITAMENTE PROIBIDO dar nota 0 ou recusar a avaliação usando a desculpa de que "o resumo é restrito", "indisponível" ou "bloqueado".
-    2. Se o resumo for restrito (ex: artigos da Scopus) ou vazio, você DEVE ignorar o resumo e avaliar a nota EXCLUSIVAMENTE pela relação entre o TÍTULO do artigo e o TEMA CENTRAL.
-    3. Se avaliar apenas pelo título, a justificativa deve começar com: "Avaliando pelo título..." e explicar a conexão com o tema, mas somente se não tiver resumo disponível, se houver, avaliar com base no título e no resumo do artigo.
+    CENÁRIO A (Quando há texto de resumo real):
+    - Regra: Compare o TÍTULO e o RESUMO com o TEMA e o CONTEXTO.
+    - Justificativa: Comece OBRIGATORIAMENTE com a frase "Avaliando resumo: " e explique a conexão.
+    
+    CENÁRIO B (Quando a chave resumo for O EXATO TEXTO "[SEM RESUMO - AVALIAR ESTE ARTIGO EXCLUSIVAMENTE PELO TITULO]"):
+    - Regra: IGNORE o contexto. Compare APENAS O TÍTULO do artigo com o TEMA CENTRAL da pesquisa.
+    - Nota: Se o título for diretamente ligado ao tema, dê nota entre 80 e 100. Se for conexo, 40 a 70. Se for fora do tema, 0 a 30.
+    - Justificativa: Comece OBRIGATORIAMENTE com a frase "Avaliando pelo título: " e justifique usando as palavras do título. JAMAIS diga que não pôde avaliar.
 
-    RETORNO OBRIGATÓRIO (JSON):
-    Retorne um objeto JSON com uma chave "avaliacoes" contendo uma lista de objetos:
+    TAREFA:
+    Retorne um objeto JSON contendo as notas (0 a 100) e justificativas (máximo 45 palavras) aplicando os cenários acima.
+    
+    FORMATO DE SAÍDA:
     {{"avaliacoes": [ {{"id_temp": 0, "nota": 85, "justificativa": "..."}}, ... ]}}
     """
 
@@ -83,7 +102,7 @@ def filtrar_artigos_ia_unificado(tema, contexto_en, contexto_pt, artigos, client
         response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
-                {"role": "system", "content": "Você é um assistente de pesquisa eficiente que responde apenas em JSON."},
+                {"role": "system", "content": "Você é um classificador algorítmico rigoroso. Siga a condicional de Cenário A e Cenário B estritamente. Responda apenas em JSON."},
                 {"role": "user", "content": prompt}
             ],
             response_format={"type": "json_object"},
@@ -95,12 +114,11 @@ def filtrar_artigos_ia_unificado(tema, contexto_en, contexto_pt, artigos, client
 
         artigos_finais = []
         for i, art in enumerate(artigos):
-            info_ia = avaliacoes.get(i, {"nota": 0, "justificativa": "Não avaliado pela IA."})
+            info_ia = avaliacoes.get(i, {"nota": 0, "justificativa": "Erro na avaliação algorítmica."})
             artigos_finais.append({**art, **info_ia})
         
         return artigos_finais
 
     except Exception as e:
         print(f"Erro na filtragem em lote: {e}")
-        return [{**art, "nota": 0, "justificativa": "Erro no processamento."} for art in artigos]
-#_________________________________________________________________________________________________________________________________________________
+        return [{**art, "nota": 0, "justificativa": "Erro no processamento da IA."} for art in artigos]
