@@ -1,17 +1,21 @@
 import os
 import requests
-from urllib.parse import urlencode, quote
+from urllib.parse import urlencode
 
 def buscar_scopus(query, max_results=10, ano_limite=2020):
     api_key = os.getenv("SCOPUS_API_KEY")
-    scraper_key = os.getenv("SCRAPER_API_KEY") # A nossa nova chave do túnel
+    scraper_key = os.getenv("SCRAPER_API_KEY")
 
     if not api_key:
         print("Aviso: SCOPUS_API_KEY não encontrada.")
         return []
 
+    # CORREÇÃO CRÍTICA: Scopus não aceita aspas simples. 
+    # O Python vai forçar a conversão para aspas duplas antes de buscar!
+    query_corrigida = query.replace("'", '"')
+    
     url_elsevier = "https://api.elsevier.com/content/search/scopus"
-    query_scopus = f"TITLE-ABS-KEY({query}) AND PUBYEAR > {ano_limite - 1}"
+    query_scopus = f"TITLE-ABS-KEY({query_corrigida}) AND PUBYEAR > {ano_limite - 1}"
     
     params = {
         "query": query_scopus,
@@ -22,23 +26,28 @@ def buscar_scopus(query, max_results=10, ano_limite=2020):
         "X-ELS-APIKey": api_key,
         "Accept": "application/json"
     }
-    
+
     try:
         if scraper_key:
-            # 1. Monta a URL "crua" (sem codificar). 
-            url_alvo_crua = f"{url_elsevier}?query={query_scopus}&count={max_results}"
+            # O ScraperAPI lida melhor quando passamos a URL alvo já embutida com os parâmetros
+            url_alvo = f"{url_elsevier}?{urlencode(params)}"
             
-            # 2. O 'requests' fará a codificação UMA ÚNICA VEZ ao montar os params do proxy
             payload_proxy = {
                 'api_key': scraper_key,
-                'url': url_alvo_crua, 
+                'url': url_alvo,
                 'keep_headers': 'true',
                 'premium': 'true'
             }
-            print("Buscando Scopus via Túnel Proxy Premium (Codificação Perfeita)...")
+            
+            print("Buscando Scopus via Túnel Proxy Premium...")
             response = requests.get("http://api.scraperapi.com", params=payload_proxy, headers=headers, timeout=50)
+            
+            # BLINDAGEM EXTRA: Se o túnel engasgar, tenta conexão direta na mesma hora!
+            if response.status_code == 500:
+                print("Aviso: Túnel falhou. Tentando Scopus via conexão direta (Plano B)...")
+                response = requests.get(url_elsevier, headers=headers, params=params, timeout=20)
+                
         else:
-            # Se não tiver chave do túnel (ex: rodando no PC da faculdade), vai direto
             print("Buscando Scopus via conexão direta...")
             response = requests.get(url_elsevier, headers=headers, params=params, timeout=20)
             
