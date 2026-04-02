@@ -1,46 +1,11 @@
-# import requests
-
-# def buscar_semantic_scholar(query_en, max_results=10, ano_limite=2020):
-#     url = "https://api.semanticscholar.org/graph/v1/paper/search"
-    
-#     # LIMPEZA: Remove operadores booleanos para a API não travar (Erro 400)
-#     query_limpa = query_en.replace(" AND ", " ").replace(" OR ", " ").replace("(", "").replace(")", "").replace('"', '')
-    
-#     # Prevenção extra: a API falha com textos muito longos
-#     if len(query_limpa) > 100:
-#         query_limpa = query_limpa[:100]
-
-#     params = {
-#         "query": query_limpa,
-#         "limit": max_results,
-#         "fields": "title,abstract,authors,year,url", 
-#         "year": f"{ano_limite}-" 
-#     }
-#     try:
-#         response = requests.get(url, params=params)
-#         data = response.json()
-#         artigos = []
-#         for item in data.get('data', []):
-#             artigos.append({
-#                 "titulo": item.get('title'),
-#                 "resumo": item.get('abstract') or "Resumo não disponível.",
-#                 "autores": ", ".join([a['name'] for a in item.get('authors', [])]),
-#                 "data": str(item.get('year', 'N/A')),
-#                 "url": item.get('url'),
-#                 "fonte": "Semantic Scholar"
-#             })
-#         return artigos
-#     except Exception as e:
-#         print(f"Erro no Semantic Scholar: {e}")
-#         return []
-
 import requests
 
 def buscar_semantic_scholar(query_en, max_results=10, ano_limite=2020):
+
     url = "https://api.semanticscholar.org/graph/v1/paper/search"
     
     # LIMPEZA OBRIGATÓRIA: Remove operadores para a API não travar
-    query_limpa = query_en.replace(" AND ", " ").replace(" OR ", " ").replace("(", "").replace(")", "").replace('"', '')
+    query_limpa = query_en.replace(" AND ", " ").replace(" OR ", " ").replace("(", "").replace(")", "").replace('"', '').replace("'", '"')
     
     # CORREÇÃO PARA O SEMANTIC SCHOLAR: API rejeita queries muito grandes.
     # Pegamos apenas as 5 primeiras palavras chave importantes para garantir resultados
