@@ -18,7 +18,7 @@ const EdicaoChaves = ({ dadosBusca, aoFinalizarBusca, setGlobalLoading }) => {
 
   const handleBuscarArtigos = async () => {
     setCarregando(true);
-    setGlobalLoading({ ativo: true, mensagem: "Extraindo e avaliando artigos (pode levar ~1-2 min)..." });
+    setGlobalLoading({ ativo: true, mensagem: "Extraindo e avaliando artigos (pode levar ~1-5 min)..." });
     try {
       // 1. Enviamos TODOS os parâmetros para o Back-end (Performance e Filtro)
       const response = await axios.post(`${API_URL}/buscar-artigos`, {
