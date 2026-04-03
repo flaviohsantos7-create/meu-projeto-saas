@@ -1,5 +1,6 @@
 import os
 import requests
+from urllib.parse import quote
 
 def buscar_scopus(query, max_results=10, ano_limite=2020):
     api_key = os.getenv("SCOPUS_API_KEY")
@@ -9,50 +10,56 @@ def buscar_scopus(query, max_results=10, ano_limite=2020):
         print("Aviso: SCOPUS_API_KEY não encontrada.")
         return []
 
-    # VACINA: Scopus não aceita aspas simples.
-    query_corrigida = query.replace("'", '"')
+    # VACINA: Garante aspas duplas e remove quebras de linha que podem vir da IA
+    query_corrigida = query.replace("'", '"').replace("\n", " ").strip()
     
     url_elsevier = "https://api.elsevier.com/content/search/scopus"
-    # A URL crua, montada manualmente sem urlencode para o proxy não engasgar
     query_scopus = f"TITLE-ABS-KEY({query_corrigida}) AND PUBYEAR > {ano_limite - 1}"
     
-    headers = {
+    # Headers obrigatórios para a Scopus
+    headers_scopus = {
         "X-ELS-APIKey": api_key,
         "Accept": "application/json"
     }
 
     try:
         if scraper_key:
-            # 1. Monta a URL alvo completamente crua
-            url_alvo_crua = f"{url_elsevier}?query={query_scopus}&count={max_results}"
+            # ESTRATÉGIA DE ELITE: Usamos POST para o ScraperAPI. 
+            # Isso permite enviar URLs gigantescas sem dar erro 500.
+            proxy_url = "http://api.scraperapi.com"
             
-            payload_proxy = {
-                'api_key': scraper_key,
-                'url': url_alvo_crua,
-                'keep_headers': 'true',
-                'premium': 'true'
+            # O ScraperAPI recebe a URL alvo como um parâmetro de formulário no POST
+            data_payload = {
+                "api_key": scraper_key,
+                "url": f"{url_elsevier}?query={quote(query_scopus)}&count={max_results}",
+                "keep_headers": "true",
+                "premium": "true"
             }
             
-            print("Buscando Scopus via Túnel Proxy Premium (URL Crua)...")
-            response = requests.get("http://api.scraperapi.com", params=payload_proxy, headers=headers, timeout=50)
+            print(f"Buscando Scopus via Túnel Proxy (Método Seguro para Queries Longas)...")
+            # Aumentamos o timeout para 90s pois a Scopus é lenta em queries complexas
+            response = requests.post(proxy_url, data=data_payload, headers=headers_scopus, timeout=90)
             
             if response.status_code != 200:
-                print(f"Aviso: Túnel falhou com status {response.status_code}. Tentando Scopus via conexão direta...")
-                response = requests.get(url_elsevier, headers=headers, params={"query": query_scopus, "count": max_results}, timeout=20)
-                
+                print(f"Aviso: Túnel falhou com status {response.status_code}. Tentando alternativa direta...")
+                response = requests.get(url_elsevier, headers=headers_scopus, params={"query": query_scopus, "count": max_results}, timeout=30)
         else:
-            print("Buscando Scopus via conexão direta...")
-            response = requests.get(url_elsevier, headers=headers, params={"query": query_scopus, "count": max_results}, timeout=20)
-            
+            response = requests.get(url_elsevier, headers=headers_scopus, params={"query": query_scopus, "count": max_results}, timeout=30)
+
         response.raise_for_status()
         dados = response.json()
         
         artigos = []
         entradas = dados.get("search-results", {}).get("entry", [])
         
+        # Se a Scopus retornar apenas um resultado, ela manda um objeto em vez de lista
+        if isinstance(entradas, dict):
+            entradas = [entradas]
+
         for item in entradas:
-            if "error" in item or not item.get("dc:title"):
+            if "error" in item or not item.get("dc:title") or item.get("dc:title") == "Result too large":
                 continue
+                
             titulo = item.get("dc:title", "Título indisponível")
             resumo = item.get("dc:description", "Resumo completo restrito pela camada gratuita da Scopus.")
             autores = item.get("dc:creator", "Autores não informados")
@@ -73,6 +80,7 @@ def buscar_scopus(query, max_results=10, ano_limite=2020):
             })
             
         return artigos
+
     except Exception as e:
         print(f"Erro ao buscar na Scopus: {e}")
         return []
