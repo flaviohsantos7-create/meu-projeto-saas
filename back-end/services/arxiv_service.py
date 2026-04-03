@@ -1,30 +1,35 @@
-import urllib, urllib.request
-import urllib.parse
+import requests
 import feedparser
 
 def buscar_arxiv(query_en, max_results=10, ano_limite=2020):
-    
-    # VACINA: Força aspas duplas no lugar de aspas simples para evitar erros de sintaxe
+    # Vacina de aspas
     query_en = query_en.replace("'", '"')
     
-    base_url = 'http://export.arxiv.org/api/query?'
+    url = "http://export.arxiv.org/api/query"
     
-    # Inclusão do filtro de data (de 01/01/ano_limite até 31/12/2026)
     query_com_data = f"{query_en} AND submittedDate:[{ano_limite}01010000 TO 202612312359]"
-    query_url = f"search_query=all:{urllib.parse.quote(query_com_data)}&start=0&max_results={max_results}"
     
-    url_completa = base_url + query_url
-    
-    # CRACHÁ: Adiciona o User-Agent para o arXiv não dar Erro 429 (Too Many Requests)
-    req = urllib.request.Request(
-        url_completa, 
-        headers={'User-Agent': 'Projeto_Universitario_SaaS/1.0 (mailto:estudante@universidade.edu)'}
-    )
-    
+    params = {
+        "search_query": f"all:{query_com_data}",
+        "start": 0,
+        "max_results": max_results
+    }
+
+    # Cabeçalho que simula um navegador real para evitar o Erro 429
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+    }
+
     try:
-        # Agora abrimos a URL passando o "req" (que contém o crachá)
-        response = urllib.request.urlopen(req).read()
-        feed = feedparser.parse(response)
+        print(f"Buscando no arXiv ({max_results} artigos)...")
+        response = requests.get(url, params=params, headers=headers, timeout=30)
+        
+        if response.status_code == 429:
+            print("arXiv bloqueou temporariamente (429). Aguardando próximo ciclo.")
+            return []
+
+        response.raise_for_status()
+        feed = feedparser.parse(response.content)
         
         artigos = []
         for entry in feed.entries:
@@ -38,5 +43,5 @@ def buscar_arxiv(query_en, max_results=10, ano_limite=2020):
             })
         return artigos
     except Exception as e:
-        print(f"Erro ao buscar no arXiv: {e}")
+        print(f"Erro no arXiv: {e}")
         return []
