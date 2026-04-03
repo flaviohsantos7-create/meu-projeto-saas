@@ -16,20 +16,21 @@ def gerar_estratégia_bilíngue(dados_brutos, client):
     Termos: {termos}
     Contexto: {contexto}
 
-    DIRETRIZES DE LÓGICA BOOLEANA:
-    1. Priorize o operador 'OR' para agrupar sinônimos, variações gramaticais e termos correlatos.
-    2. Use o operador 'AND' APENAS para conectar conceitos diferentes (ex: Tema AND Tecnologia AND Localização).
-    3. Evite strings restritivas demais. Se o usuário forneceu termos variados para o mesmo conceito, eles DEVEM estar entre parênteses unidos por 'OR'.
-    4. Garanta que a string em inglês utilize termos técnicos (MeSH/Emtree) quando apropriado.
-    5. Crie um título bem curto (máximo 5 palavras) que resuma o NÚCLEO da pesquisa para ser usado no histórico do sistema.
+    REGRAS CRÍTICAS DE LÓGICA E TAMANHO (EVITE ERROS DE API):
+    1. A string DEVE SER EXTREMAMENTE CURTA E CONCISA. Strings longas quebram os servidores das bases de dados.
+    2. Limite ABSOLUTO: Use no MÁXIMO 3 blocos conectados por 'AND'.
+    3. Dentro de cada bloco, use no MÁXIMO 2 ou 3 sinônimos conectados por 'OR'.
+    4. Exemplo perfeito e seguro: ("Generative AI" OR "Machine Learning") AND ("Higher Education" OR "University") AND ("Ethics")
+    5. Priorize apenas os termos técnicos nucleares.
+    6. Crie um título bem curto (máximo 5 palavras) que resuma o NÚCLEO da pesquisa para ser usado no histórico do sistema.
 
     Gere um JSON com a seguinte estrutura:
     {{
-        "titulo_historico": "Um título curto e direto (máximo 5 palavras) que resuma o núcleo central da pesquisa",
-        "string_pt": "String booleana em português (ex: ('termo1' OR 'sinônimo') AND ('contexto1' OR 'contexto2'))",
-        "contexto_pt": "Resumo do contexto técnico em português para comparação e filtragem semântica, resumo bem estruturado com e rico em detalhes",
-        "string_en": "String booleana em inglês técnico (ex: ('term1' OR 'synonym') AND ('context1' OR 'context2'))",
-        "contexto_en": "Summary of the technical context in English for semantic comparison and filtering; a well-structured summary rich in detail"
+        "titulo_historico": "Um título curto (máximo 5 palavras)",
+        "string_pt": "String curta em português (Ex: ('termo1' OR 'sinônimo') AND ('contexto'))",
+        "contexto_pt": "Resumo do contexto técnico em português detalhado",
+        "string_en": "String curta em inglês (Ex: ('term1' OR 'synonym') AND ('context'))",
+        "contexto_en": "Summary of the technical context in English"
     }}
     """
     
