@@ -1,85 +1,74 @@
 import os
 import requests
-from urllib.parse import urlencode
 
 def buscar_scopus(query, max_results=10, ano_limite=2020):
     api_key = os.getenv("SCOPUS_API_KEY")
     scraper_key = os.getenv("SCRAPER_API_KEY")
 
     if not api_key:
-        print("Aviso: SCOPUS_API_KEY não encontrada.")
+        print("Erro: SCOPUS_API_KEY ausente.")
         return []
 
-    # VACINA: Garante aspas duplas e remove quebras de linha que podem vir da IA
-    query_corrigida = query.replace("'", '"').replace("\n", " ").strip()
+    # Tratamento rigoroso da query
+    query_limpa = query.replace("'", '"').replace("\n", " ").strip()
+    query_scopus = f"TITLE-ABS-KEY({query_limpa}) AND PUBYEAR > {ano_limite - 1}"
     
-    query_scopus = f"TITLE-ABS-KEY({query_corrigida}) AND PUBYEAR > {ano_limite - 1}"
-    
-    # ESTRATÉGIA DE OURO: Enviar a chave da API e o formato JSON diretamente na URL!
-    # Isso impede que o túnel do proxy remova os dados de autenticação por engano.
+    # URL Alvo sem parâmetros de autenticação (segurança máxima)
+    url_alvo = "https://api.elsevier.com/content/search/scopus"
     params_elsevier = {
         "query": query_scopus,
-        "count": max_results,
-        "apiKey": api_key,
-        "httpAccept": "application/json"
+        "count": min(max_results, 25) # Algumas chaves Scopus limitam a 25 por página
     }
-    
-    # Monta a URL completa da Elsevier já com a sua chave de acesso cravada nela
-    url_elsevier_completa = f"https://api.elsevier.com/content/search/scopus?{urlencode(params_elsevier)}"
+
+    # HEADERS: O segredo para evitar o erro 403
+    headers = {
+        "X-ELS-APIKey": api_key,
+        "Accept": "application/json",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+    }
 
     try:
         if scraper_key:
-            # Enviamos a URL blindada para o ScraperAPI usando o método GET correto
-            params_scraper = {
-                "api_key": scraper_key,
-                "url": url_elsevier_completa,
-                "premium": "true"
+            # Preparamos a URL final para o ScraperAPI sem codificação dupla
+            # O requests.Request().prepare() gera a URL perfeita
+            req = requests.Request('GET', url_alvo, params=params_elsevier).prepare()
+            
+            payload_proxy = {
+                'api_key': scraper_key,
+                'url': req.url,
+                'keep_headers': 'true', # CRÍTICO: Mantém o X-ELS-APIKey no túnel
+                'premium': 'true'
             }
             
-            print("Buscando Scopus via Túnel Proxy Premium (URL Blindada)...")
-            response = requests.get("http://api.scraperapi.com", params=params_scraper, timeout=60)
-            
-            if response.status_code != 200:
-                print(f"Aviso: Túnel falhou com status {response.status_code}. Tentando alternativa direta...")
-                response = requests.get(url_elsevier_completa, timeout=30)
+            print("Iniciando busca Scopus via Túnel Premium com Headers preservados...")
+            response = requests.get("http://api.scraperapi.com", params=payload_proxy, headers=headers, timeout=60)
         else:
-            response = requests.get(url_elsevier_completa, timeout=30)
+            response = requests.get(url_alvo, params=params_elsevier, headers=headers, timeout=30)
+
+        if response.status_code == 403:
+            print("Erro 403: A chave da Scopus foi rejeitada ou o limite de resultados foi excedido.")
+            return []
 
         response.raise_for_status()
         dados = response.json()
         
-        artigos = []
         entradas = dados.get("search-results", {}).get("entry", [])
-        
-        # Se a Scopus retornar apenas um resultado, ela manda um objeto em vez de lista
-        if isinstance(entradas, dict):
-            entradas = [entradas]
+        if isinstance(entradas, dict): entradas = [entradas]
 
+        artigos = []
         for item in entradas:
-            if "error" in item or not item.get("dc:title") or item.get("dc:title") == "Result too large":
-                continue
-                
-            titulo = item.get("dc:title", "Título indisponível")
-            resumo = item.get("dc:description", "Resumo completo restrito pela camada gratuita da Scopus.")
-            autores = item.get("dc:creator", "Autores não informados")
-            
-            data_pub_bruta = item.get("prism:coverDate", "Data desconhecida")
-            data_pub = data_pub_bruta[:4] if data_pub_bruta != "Data desconhecida" else "Data desconhecida"
-            
-            links = item.get("link", [])
-            link_oficial = next((l["@href"] for l in links if l.get("@ref") == "scopus"), "")
+            if "error" in item or not item.get("dc:title"): continue
             
             artigos.append({
-                "titulo": titulo,
-                "resumo": resumo,
-                "autores": autores,
-                "data": data_pub,
+                "titulo": item.get("dc:title", "Título indisponível"),
+                "resumo": item.get("dc:description", "Resumo restrito."),
+                "autores": item.get("dc:creator", "N/A"),
+                "data": (item.get("prism:coverDate", "0000"))[:4],
                 "fonte": "Scopus",
-                "url": link_oficial
+                "url": next((l["@href"] for l in item.get("link", []) if l.get("@ref") == "scopus"), "")
             })
-            
         return artigos
 
     except Exception as e:
-        print(f"Erro ao buscar na Scopus: {e}")
+        print(f"Falha na Scopus: {e}")
         return []
