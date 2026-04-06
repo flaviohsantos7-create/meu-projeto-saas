@@ -78,13 +78,28 @@ def login():
         
         if not usuario or not check_password_hash(usuario.senha_hash, dados.get('senha')):
             return jsonify({"error": "E-mail ou senha incorretos"}), 401
+
+        ua_string = request.headers.get('User-Agent', '')
+        
+        plat_nome = "Desconhecido"
+        if "Windows" in ua_string: plat_nome = "Windows"
+        elif "Mac" in ua_string: plat_nome = "MacOS"
+        elif "Linux" in ua_string: plat_nome = "Linux"
+        elif "Android" in ua_string: plat_nome = "Android"
+        elif "iPhone" in ua_string or "iPad" in ua_string: plat_nome = "iOS"
+
+        nav_nome = "Desconhecido"
+        if "Edg" in ua_string: nav_nome = "Edge"
+        elif "Chrome" in ua_string: nav_nome = "Chrome"
+        elif "Firefox" in ua_string: nav_nome = "Firefox"
+        elif "Safari" in ua_string and "Chrome" not in ua_string: nav_nome = "Safari"
             
         # Registra o Log de Acesso
         novo_log = UserLog(
             usuario_id=usuario.id, 
             ip_address=request.remote_addr,
-            plataforma=request.user_agent.platform or "Desconhecido",
-            navegador=request.user_agent.browser or "Desconhecido"
+            plataforma=plat_nome,
+            navegador=nav_nome
         )
         db.add(novo_log)
         db.commit()
@@ -123,13 +138,27 @@ def google_login():
             db.add(usuario)
             db.commit()
             db.refresh(usuario)
+
+        ua_string = request.headers.get('User-Agent', '')
+        plat_nome = "Desconhecido"
+        if "Windows" in ua_string: plat_nome = "Windows"
+        elif "Mac" in ua_string: plat_nome = "MacOS"
+        elif "Linux" in ua_string: plat_nome = "Linux"
+        elif "Android" in ua_string: plat_nome = "Android"
+        elif "iPhone" in ua_string or "iPad" in ua_string: plat_nome = "iOS"
+
+        nav_nome = "Desconhecido"
+        if "Edg" in ua_string: nav_nome = "Edge"
+        elif "Chrome" in ua_string: nav_nome = "Chrome"
+        elif "Firefox" in ua_string: nav_nome = "Firefox"
+        elif "Safari" in ua_string and "Chrome" not in ua_string: nav_nome = "Safari"
             
         # Registra o Log
         novo_log = UserLog(
             usuario_id=usuario.id, 
             ip_address=request.remote_addr,
-            plataforma=request.user_agent.platform or "Desconhecido",
-            navegador=request.user_agent.browser or "Desconhecido"
+            plataforma=plat_nome,
+            navegador=nav_nome
         )
         db.add(novo_log)
         db.commit()
